@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Layer Architecture with API Separation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+
+        .info-box {
+            background: #e6fffa;
+            border-left: 4px solid #319795;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 30px 0;
+        }
+
+        .info-box strong {
+            color: #234e52;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        .info-box p {
+            color: #285e61;
+            line-height: 1.6;
+        }
+
+        .comparison-section {
+            margin: 50px 0;
+        }
+
+        .comparison-title {
+            font-size: 2em;
+            color: #2d3748;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .arch-card {
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .arch-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+        }
+
+        .monolithic-card {
+            background: linear-gradient(135deg, #ffd1dc 0%, #ffa6c9 100%);
+            border: 3px solid #ec4899;
+        }
+
+        .microservices-card {
+            background: linear-gradient(135deg, #c6f6d5 0%, #9ae6b4 100%);
+            border: 3px solid #38a169;
+        }
+
+        .arch-card h3 {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .monolithic-card h3 {
+            color: #831843;
+        }
+
+        .microservices-card h3 {
+            color: #22543d;
+        }
+
+        .arch-diagram {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin: 20px 0;
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .monolithic-box {
+            background: linear-gradient(135deg, #ec4899 0%, #be185d 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            text-align: center;
+            margin: 10px 0;
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(236, 72, 153, 0.3);
+        }
+
+        .microservices-boxes {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .micro-box {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            flex: 1;
+            min-width: 120px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.9em;
+            box-shadow: 0 4px 10px rgba(72, 187, 120, 0.3);
+        }
+
+        .pros-cons {
+            margin-top: 20px;
+        }
+
+        .pros-cons h4 {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            color: #2d3748;
+        }
+
+        .pros-cons ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .pros-cons li {
+            background: white;
+            padding: 10px 15px;
+            margin: 8px 0;
+            border-radius: 8px;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+
+        .monolithic-card .pros-cons li {
+            border-left: 4px solid #ec4899;
+            color: #831843;
+        }
+
+        .microservices-card .pros-cons li {
+            border-left: 4px solid #48bb78;
+            color: #22543d;
+        }
+
+        .separation-section {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            padding: 40px;
+            border-radius: 15px;
+            margin: 50px 0;
+        }
+
+        .separation-title {
+            font-size: 2em;
+            color: #78350f;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .separation-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .separation-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            border: 3px solid #d97706;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+        }
+
+        .separation-card h4 {
+            font-size: 1.5em;
+            color: #92400e;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .separation-visual {
+            background: #fef3c7;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        .layer-box {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            padding: 15px;
+            margin: 8px 0;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .horizontal-layers {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .horizontal-layers .layer-box {
+            flex: 1;
+            min-width: 100px;
+        }
+
+        .benefits-section {
+            margin: 50px 0;
+        }
+
+        .benefits-title {
+            font-size: 2em;
+            color: #2d3748;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .benefit-card {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            padding: 25px;
+            border-radius: 12px;
+            border: 3px solid #3b82f6;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .benefit-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        .benefit-card h4 {
+            font-size: 1.4em;
+            color: #1e3a8a;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .benefit-card p {
+            color: #1e40af;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .benefit-card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .benefit-card li {
+            color: #1e40af;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+            font-size: 0.95em;
+        }
+
+        .benefit-card li:last-child {
+            border-bottom: none;
+        }
+
+        .architecture-flow {
+            background: #f7fafc;
+            padding: 40px;
+            border-radius: 15px;
+            margin: 50px 0;
+        }
+
+        .flow-title {
+            font-size: 2em;
+            color: #2d3748;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .flow-diagram {
+            display: flex;
+            justify-content: space-around;
+            align-items: stretch;
+            gap: 30px;
+        }
+
+        .flow-component {
+            flex: 1;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+            border: 3px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .flow-component:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .frontend-component {
+            border-color: #3b82f6;
+        }
+
+        .api-component {
+            border-color: #8b5cf6;
+        }
+
+        .backend-component {
+            border-color: #10b981;
+        }
+
+        .flow-component h4 {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .frontend-component h4 {
+            color: #1e40af;
+        }
+
+        .api-component h4 {
+            color: #6d28d9;
+        }
+
+        .backend-component h4 {
+            color: #047857;
+        }
+
+        .component-item {
+            background: #f7fafc;
+            padding: 12px 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            font-size: 0.95em;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .frontend-component .component-item {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            color: #1e40af;
+        }
+
+        .api-component .component-item {
+            background: linear-gradient(135deg, #e9d5ff 0%, #d8b4fe 100%);
+            color: #6d28d9;
+        }
+
+        .backend-component .component-item {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            color: #047857;
+        }
+
+        .arrow-between {
+            display: flex;
+            align-items: center;
+            font-size: 2em;
+            color: #cbd5e0;
+            font-weight: bold;
+        }
+
+        nav {
+            background: #f8f9fa;
+            padding: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 3px solid #667eea;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            scroll-margin-top: 20px;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        nav span {
+            text-decoration: none;
+            color: #667eea;
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: all 0.3s;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        nav span:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 40px;
+        }
+
+        .section-header h2 {
+            margin: 0;
+            flex: 1;
+        }
+
+        @media (max-width: 768px) {
+            nav ul {
+                flex-direction: column;
+            }
+        }
+
+
+
+        .tools-section {
+            margin-top: 50px;
+            background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
+            padding: 35px;
+            border-radius: 15px;
+            color: white;
+        }
+
+        .tools-title {
+            font-size: 1.8em;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .tool-card {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .tool-card:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateY(-3px);
+        }
+
+        .tool-card h4 {
+            font-size: 1.3em;
+            margin-bottom: 10px;
+        }
+
+        .tool-card p {
+            font-size: 0.95em;
+            line-height: 1.6;
+            margin-bottom: 12px;
+            opacity: 0.95;
+        }
+
+        .tool-card .alternatives {
+            font-size: 0.85em;
+            background: rgba(0,0,0,0.2);
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Frontend-Backend Separation Architecture</h1>
+        <p class="subtitle">
+            Multi-layer architecture divides applications into distinct frontend and backend components that communicate 
+            through well-defined API interfaces. This separation enables independent development, deployment, and scaling 
+            while maintaining clean boundaries between presentation and business logic.
+        </p>
+
+        <div class="info-box">
+            <strong>Why This Matters:</strong>
+            <p>
+                Monolithic applications become difficult to maintain, scale, and deploy as they grow. Separating frontend 
+                and backend allows teams to work independently, deploy updates without affecting the entire system, and 
+                choose the best technologies for each layer. This architecture is fundamental to modern web development.
+            </p>
+        </div>
+
+        <nav id="navigation-menu">
+            <ul>
+                <li><span onclick="document.getElementById('monolithic-vs-microservices').scrollIntoView({behavior: 'smooth'})">Monolithic vs Microservices</span></li>
+                <li><span onclick="document.getElementById('horizontal-vs-vertical').scrollIntoView({behavior: 'smooth'})">Horizontal vs Vertical</span></li>
+                <li><span onclick="document.getElementById('why-separate').scrollIntoView({behavior: 'smooth'})">Why Separate Components</span></li>
+                <li><span onclick="document.getElementById('communication-flow').scrollIntoView({behavior: 'smooth'})">Communication Flow</span></li>
+                <li><span onclick="document.getElementById('tools-frameworks').scrollIntoView({behavior: 'smooth'})">Tools & Frameworks</span></li>
+            </ul>
+        </nav>
+
+        <div id="monolithic-vs-microservices" class="comparison-section">
+            <h2 class="comparison-title">Monolithic vs Microservices Architecture</h2>
+            
+            <div class="comparison-grid">
+                <div class="arch-card monolithic-card">
+                    <h3>Monolithic Architecture</h3>
+                    
+                    <div class="arch-diagram">
+                        <div class="monolithic-box">UI Layer</div>
+                        <div class="monolithic-box">Business Logic</div>
+                        <div class="monolithic-box">Data Access</div>
+                        <div class="monolithic-box">Database</div>
+                    </div>
+                    
+                    <div class="pros-cons">
+                        <h4>Advantages:</h4>
+                        <ul>
+                            <li>• Simple to develop and test initially</li>
+                            <li>• Easy to deploy (single unit)</li>
+                            <li>• Less complex infrastructure</li>
+                            <li>• Better for small teams/projects</li>
+                        </ul>
+                        
+                        <h4>Disadvantages:</h4>
+                        <ul>
+                            <li>• Tight coupling - changes affect entire system</li>
+                            <li>• Difficult to scale specific components</li>
+                            <li>• Technology lock-in (single stack)</li>
+                            <li>• Long deployment cycles</li>
+                            <li>• Single point of failure</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="arch-card microservices-card">
+                    <h3>Microservices Architecture</h3>
+                    
+                    <div class="arch-diagram">
+                        <div class="microservices-boxes">
+                            <div class="micro-box">User<br>Service</div>
+                            <div class="micro-box">Auth<br>Service</div>
+                            <div class="micro-box">Content<br>Service</div>
+                        </div>
+                        <div class="microservices-boxes">
+                            <div class="micro-box">Payment<br>Service</div>
+                            <div class="micro-box">Notification<br>Service</div>
+                            <div class="micro-box">Analytics<br>Service</div>
+                        </div>
+                    </div>
+                    
+                    <div class="pros-cons">
+                        <h4>Advantages:</h4>
+                        <ul>
+                            <li>• Independent deployment & scaling</li>
+                            <li>• Technology flexibility per service</li>
+                            <li>• Team autonomy and parallel development</li>
+                            <li>• Fault isolation (one service fails, others work)</li>
+                        </ul>
+                        
+                        <h4>Disadvantages:</h4>
+                        <ul>
+                            <li>• Complex infrastructure & orchestration</li>
+                            <li>• Network latency between services</li>
+                            <li>• Distributed system challenges</li>
+                            <li>• Higher operational overhead</li>
+                            <li>• Testing complexity increases</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="horizontal-vs-vertical" class="separation-section">
+            <h2 class="separation-title">Horizontal vs Vertical Separation</h2>
+            
+            <div class="separation-grid">
+                <div class="separation-card">
+                    <h4>↔Horizontal Separation</h4>
+                    <p><strong>Definition:</strong> Dividing application into layers based on technical responsibility (UI, API, Business Logic, Database)</p>
+                    
+                    <div class="separation-visual">
+                        <div class="layer-box">Frontend (Streamlit/React)</div>
+                        <div class="layer-box">API Layer (FastAPI)</div>
+                        <div class="layer-box">Business Logic</div>
+                        <div class="layer-box">Data Layer (Database)</div>
+                    </div>
+                    
+                    <p><strong>Benefits:</strong></p>
+                    <ul>
+                        <li>Clear separation of concerns</li>
+                        <li>Easier to understand for developers</li>
+                        <li>Reusable layers across features</li>
+                        <li>Frontend/Backend team specialization</li>
+                    </ul>
+                    
+                    <p><strong>Example:</strong> Separating Streamlit UI from FastAPI backend</p>
+                </div>
+
+                <div class="separation-card">
+                    <h4>Vertical Separation</h4>
+                    <p><strong>Definition:</strong> Dividing application by business capability or feature domain (User Management, Content Analysis, Payments)</p>
+                    
+                    <div class="separation-visual">
+                        <div class="horizontal-layers">
+                            <div class="layer-box">User<br>Service</div>
+                            <div class="layer-box">Content<br>Service</div>
+                            <div class="layer-box">Auth<br>Service</div>
+                        </div>
+                    </div>
+                    
+                    <p><strong>Benefits:</strong></p>
+                    <ul>
+                        <li>Independent feature development</li>
+                        <li>Team ownership of full feature stack</li>
+                        <li>Easier to scale specific features</li>
+                        <li>Better for microservices architecture</li>
+                    </ul>
+                    
+                    <p><strong>Example:</strong> Separate services for scraping, analysis, and reporting</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="why-separate" class="benefits-section">
+            <h2 class="benefits-title">Why Separate Frontend & Backend?</h2>
+            
+            <div class="benefits-grid">
+                <div class="benefit-card">
+                    <h4>Independent Development</h4>
+                    <p><strong>Frontend and backend teams can work simultaneously without blocking each other</strong></p>
+                    <ul>
+                        <li>• Parallel development increases velocity</li>
+                        <li>• Teams use specialized skills (UI/UX vs backend logic)</li>
+                        <li>• Clear API contract defines integration point</li>
+                        <li>• Reduces merge conflicts and dependencies</li>
+                    </ul>
+                </div>
+
+                <div class="benefit-card">
+                    <h4>Flexible Deployment</h4>
+                    <p><strong>Deploy frontend and backend independently with zero downtime</strong></p>
+                    <ul>
+                        <li>• Update UI without touching backend code</li>
+                        <li>• Backend changes don't require frontend rebuild</li>
+                        <li>• A/B test different frontends with same backend</li>
+                        <li>• Rollback specific layer if issues occur</li>
+                    </ul>
+                </div>
+
+                <div class="benefit-card">
+                    <h4>Technology Flexibility</h4>
+                    <p><strong>Choose the best tool for each layer without constraints</strong></p>
+                    <ul>
+                        <li>• Frontend: React, Vue, Streamlit, or mobile apps</li>
+                        <li>• Backend: Python, Node.js, Go, or Java</li>
+                        <li>• Switch technologies without complete rewrite</li>
+                        <li>• Use modern frameworks as they emerge</li>
+                    </ul>
+                </div>
+
+                <div class="benefit-card">
+                    <h4>Scalability</h4>
+                    <p><strong>Scale frontend and backend independently based on load</strong></p>
+                    <ul>
+                        <li>• Heavy computation? Scale backend instances</li>
+                        <li>• Many users? Scale frontend/CDN</li>
+                        <li>• Optimize costs by scaling what you need</li>
+                        <li>• Handle different traffic patterns efficiently</li>
+                    </ul>
+                </div>
+
+                <div class="benefit-card">
+                    <h4>Reusability</h4>
+                    <p><strong>One backend API serves multiple frontends (web, mobile, desktop)</strong></p>
+                    <ul>
+                        <li>• Build once, use everywhere approach</li>
+                        <li>• Consistent business logic across platforms</li>
+                        <li>• Third-party integrations via API</li>
+                        <li>• Partner ecosystems can build on your API</li>
+                    </ul>
+                </div>
+
+                <div class="benefit-card">
+                    <h4>Testing & Maintenance</h4>
+                    <p><strong>Easier to test, debug, and maintain isolated components</strong></p>
+                    <ul>
+                        <li>• Unit test frontend and backend separately</li>
+                        <li>• Mock API responses for frontend testing</li>
+                        <li>• Backend logic testable without UI</li>
+                        <li>• Smaller codebases are easier to understand</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div id="communication-flow" class="architecture-flow">
+            <h2 class="flow-title">Frontend-Backend Communication Flow</h2>
+            
+            <div class="flow-diagram">
+                <div class="flow-component frontend-component">
+                    <h4>Frontend (Streamlit)</h4>
+                    <div class="component-item">User Interface</div>
+                    <div class="component-item">Form Inputs</div>
+                    <div class="component-item">Data Visualization</div>
+                    <div class="component-item">State Management</div>
+                    <div class="component-item">API Client</div>
+                </div>
+
+                <div class="arrow-between">⟷</div>
+
+                <div class="flow-component api-component">
+                    <h4>REST API</h4>
+                    <div class="component-item">POST /analyze</div>
+                    <div class="component-item">GET /results</div>
+                    <div class="component-item">CORS Headers</div>
+                    <div class="component-item">JSON Responses</div>
+                    <div class="component-item">Authentication</div>
+                </div>
+
+                <div class="arrow-between">⟷</div>
+
+                <div class="flow-component backend-component">
+                    <h4>Backend (FastAPI)</h4>
+                    <div class="component-item">Business Logic</div>
+                    <div class="component-item">Web Scraping</div>
+                    <div class="component-item">LLM Integration</div>
+                    <div class="component-item">Data Processing</div>
+                    <div class="component-item">Database Access</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tools-frameworks" class="tools-section">
+            <h2 class="tools-title">Tools & Frameworks for Multi-Layer Architecture</h2>
+            <div class="tools-grid">
+                <div class="tool-card">
+                    <h4>Frontend Frameworks</h4>
+                    <p><strong>Primary:</strong> Streamlit - Python-based framework for rapid data app development with minimal frontend code</p>
+                    <div class="alternatives">
+                        <strong>Alternatives:</strong><br>
+                        • React - Component-based JavaScript library<br>
+                        • Vue.js - Progressive JavaScript framework<br>
+                        • Angular - Full-featured TypeScript framework<br>
+                        • Svelte - Compile-time framework
+                    </div>
+                </div>
+
+                <div class="tool-card">
+                    <h4>Backend Frameworks</h4>
+                    <p><strong>Primary:</strong> FastAPI - Modern Python framework with automatic API docs, type hints, and async support</p>
+                    <div class="alternatives">
+                        <strong>Alternatives:</strong><br>
+                        • Flask - Lightweight Python framework<br>
+                        • Django REST - Full-featured Python framework<br>
+                        • Express.js - Node.js web framework<br>
+                        • Spring Boot - Java enterprise framework
+                    </div>
+                </div>
+
+                <div class="tool-card">
+                    <h4>API Communication</h4>
+                    <p><strong>Primary:</strong> requests library - Simple HTTP client for making API calls from frontend to backend</p>
+                    <div class="alternatives">
+                        <strong>Alternatives:</strong><br>
+                        • httpx - Modern async HTTP client<br>
+                        • aiohttp - Async HTTP client/server<br>
+                        • axios - Promise-based HTTP client (JS)<br>
+                        • fetch API - Native browser API
+                    </div>
+                </div>
+
+                <div class="tool-card">
+                    <h4>API Documentation</h4>
+                    <p><strong>Primary:</strong> OpenAPI/Swagger - Auto-generated interactive API documentation built into FastAPI</p>
+                    <div class="alternatives">
+                        <strong>Alternatives:</strong><br>
+                        • Postman - API testing and documentation<br>
+                        • Redoc - OpenAPI documentation generator<br>
+                        • API Blueprint - Markdown-based API docs<br>
+                        • GraphQL Playground - GraphQL IDE
+                    </div>
+                </div>
+
+                <div class="tool-card">
+                    <h4>CORS Management</h4>
+                    <p><strong>Primary:</strong> FastAPI CORSMiddleware - Built-in middleware for handling cross-origin requests between frontend and backend</p>
+                    <div class="alternatives">
+                        <strong>Alternatives:</strong><br>
+                        • Flask-CORS - CORS extension for Flask<br>
+                        • django-cors-headers - Django CORS package<br>
+                        • cors (Node.js) - Express middleware<br>
+                        • nginx - Proxy-level CORS configuration
+                    </div>
+                </div>
+
+                <div class="tool-card">
+                    <h4>Deployment & Orchestration</h4>
+                    <p><strong>Primary:</strong> Docker - Containerize frontend and backend separately for independent deployment and scaling</p>
+                    <div class="alternatives">
+                        <strong>Alternatives:</strong><br>
+                        • Kubernetes - Container orchestration<br>
+                        • Docker Compose - Multi-container apps<br>
+                        • Heroku - Platform as a Service<br>
+                        • AWS ECS/Fargate - Managed containers
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

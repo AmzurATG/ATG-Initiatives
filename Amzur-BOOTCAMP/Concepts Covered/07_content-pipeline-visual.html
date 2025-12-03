@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Content Processing Pipeline</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+
+        .pipeline {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 50px 0;
+            position: relative;
+        }
+
+        .stage {
+            flex: 1;
+            text-align: center;
+            padding: 25px 20px;
+            background: #f7fafc;
+            border-radius: 15px;
+            margin: 0 10px;
+            transition: all 0.6s ease;
+            cursor: pointer;
+            border: 3px solid #e2e8f0;
+            position: relative;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .stage:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+            border-color: #667eea;
+        }
+
+        .stage.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: scale(1.12) translateY(-10px);
+            box-shadow: 0 20px 50px rgba(102, 126, 234, 0.6);
+            border-color: #764ba2;
+            z-index: 10;
+        }
+
+        .stage-icon {
+            font-size: 3.5em;
+            margin-bottom: 15px;
+            transition: all 0.6s ease;
+            display: inline-block;
+        }
+
+        .stage.active .stage-icon {
+            transform: scale(1.3) rotate(360deg);
+            filter: drop-shadow(0 0 20px rgba(255,255,255,0.8));
+        }
+
+        .stage-title {
+            font-weight: bold;
+            font-size: 1.3em;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .stage.active .stage-title {
+            font-size: 1.4em;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .stage-desc {
+            font-size: 0.95em;
+            color: #718096;
+            transition: all 0.3s ease;
+        }
+
+        .stage.active .stage-desc {
+            color: rgba(255,255,255,0.95);
+            font-weight: 500;
+            font-size: 1em;
+        }
+
+        .arrow {
+            font-size: 3em;
+            color: #cbd5e0;
+            flex-shrink: 0;
+            transition: all 0.5s ease;
+            font-weight: bold;
+        }
+
+        .arrow.active {
+            color: #48bb78;
+            transform: scale(1.5);
+            text-shadow: 0 0 20px rgba(72, 187, 120, 0.8);
+            animation: arrowPulse 1s ease-in-out infinite;
+        }
+
+        @keyframes arrowPulse {
+            0%, 100% { 
+                opacity: 1; 
+                transform: scale(1.5);
+            }
+            50% { 
+                opacity: 0.4;
+                transform: scale(1.8);
+            }
+        }
+
+        .demo-section {
+            background: #f7fafc;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 50px;
+        }
+
+        .demo-title {
+            font-size: 1.8em;
+            color: #2d3748;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .demo-box {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+        }
+
+        .demo-box h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .demo-box pre {
+            background: #2d3748;
+            color: #68d391;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9em;
+            line-height: 1.6;
+        }
+
+        .tools-section {
+            margin-top: 50px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 35px;
+            border-radius: 15px;
+            color: white;
+        }
+
+        .tools-title {
+            font-size: 1.8em;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .tool-card {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .tool-card:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateY(-3px);
+        }
+
+        .tool-card h4 {
+            font-size: 1.3em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tool-card p {
+            font-size: 0.95em;
+            line-height: 1.6;
+            margin-bottom: 12px;
+            opacity: 0.95;
+        }
+
+        .tool-card .alternatives {
+            font-size: 0.85em;
+            background: rgba(0,0,0,0.2);
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+
+        .control-buttons {
+            text-align: center;
+            margin-top: 30px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 18px 45px;
+            border-radius: 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            margin: 0 15px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:hover {
+            background: #764ba2;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .info-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 30px 0;
+        }
+
+        .info-box strong {
+            color: #856404;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        .info-box p {
+            color: #856404;
+            line-height: 1.6;
+        }
+
+        .status-message {
+            text-align: center;
+            font-size: 1.4em;
+            font-weight: 700;
+            margin: 25px 0;
+            padding: 20px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #e6fffa 0%, #b2f5ea 100%);
+            color: #234e52;
+            border: 3px solid #4fd1c5;
+            display: none;
+            box-shadow: 0 8px 20px rgba(79, 209, 197, 0.3);
+        }
+
+        .status-message.show {
+            display: block;
+            animation: slideInBounce 0.6s ease;
+        }
+
+        @keyframes slideInBounce {
+            0% {
+                opacity: 0;
+                transform: translateY(-30px) scale(0.8);
+            }
+            60% {
+                transform: translateY(5px) scale(1.05);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .instruction-box {
+            background: #e0e7ff;
+            border: 2px solid #667eea;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .instruction-box strong {
+            color: #667eea;
+            font-size: 1.2em;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .instruction-box p {
+            color: #4c51bf;
+            font-size: 1.05em;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Content Processing Pipeline</h1>
+        <p class="subtitle">
+            Transform raw, unstructured HTML into clean, structured data through a series of intelligent filtering, 
+            cleaning, and normalization steps. This pipeline ensures meaningful content extraction from diverse website layouts.
+        </p>
+
+        <div class="info-box">
+            <strong>Why This Matters:</strong>
+            <p>Raw content from websites often contains irrelevant elements (ads, navigation, footers), inconsistent formatting, 
+            and excessive noise that must be filtered before meaningful analysis can occur. This pipeline automates the transformation 
+            from messy HTML to pristine, analyzable data.</p>
+        </div>
+
+        <div class="instruction-box">
+            <strong>Watch These Visual Changes:</strong>
+            <p>
+                When you click "Animate Pipeline", observe: <br>
+                ✨ Each box scales up and changes to purple gradient<br>
+                🔄 Icons spin and glow when active<br>
+                ➡️ Green arrows pulse between stages<br>
+                💬 Status message updates below showing what's happening
+            </p>
+        </div>
+
+        <div class="pipeline" id="pipeline">
+            <div class="stage" data-stage="0">
+                <div class="stage-icon">📄</div>
+                <div class="stage-title">Raw HTML</div>
+                <div class="stage-desc">Unstructured webpage content</div>
+            </div>
+            <div class="arrow" data-arrow="0">→</div>
+            
+            <div class="stage" data-stage="1">
+                <div class="stage-icon">🧹</div>
+                <div class="stage-title">Noise Removal</div>
+                <div class="stage-desc">Filter ads, navigation, footers</div>
+            </div>
+            <div class="arrow" data-arrow="1">→</div>
+            
+            <div class="stage" data-stage="2">
+                <div class="stage-icon">✂️</div>
+                <div class="stage-title">Text Extraction</div>
+                <div class="stage-desc">Extract meaningful content</div>
+            </div>
+            <div class="arrow" data-arrow="2">→</div>
+            
+            <div class="stage" data-stage="3">
+                <div class="stage-icon">📏</div>
+                <div class="stage-title">Normalization</div>
+                <div class="stage-desc">Clean & standardize format</div>
+            </div>
+            <div class="arrow" data-arrow="3">→</div>
+            
+            <div class="stage" data-stage="4">
+                <div class="stage-icon">📦</div>
+                <div class="stage-title">Structured Output</div>
+                <div class="stage-desc">Ready for analysis</div>
+            </div>
+        </div>
+
+        <div class="status-message" id="statusMessage"></div>
+
+        <div class="control-buttons">
+            <button class="btn" id="animateBtn">Animate Pipeline</button>
+            <button class="btn" id="resetBtn">Reset</button>
+        </div>
+
+        <div class="demo-section">
+            <h2 class="demo-title">Before & After Examples</h2>
+            <div class="demo-grid">
+                <div class="demo-box">
+                    <h3>Before Processing (Raw HTML)</h3>
+                    <pre>&lt;html&gt;
+  &lt;nav&gt;Menu | Home | About&lt;/nav&gt;
+  &lt;div class="ad"&gt;Advertisement&lt;/div&gt;
+  &lt;article&gt;
+    &lt;h1&gt;  AI Revolution  &lt;/h1&gt;
+    &lt;p&gt;Artificial intelligence is 
+    transforming    industries...&lt;/p&gt;
+  &lt;/article&gt;
+  &lt;footer&gt;© 2025 Company&lt;/footer&gt;
+&lt;/html&gt;</pre>
+                </div>
+                
+                <div class="demo-box">
+                    <h3>After Processing (Structured)</h3>
+                    <pre>{
+  "title": "AI Revolution",
+  "headings": ["AI Revolution"],
+  "main_text": "Artificial intelligence 
+  is transforming industries...",
+  "word_count": 247,
+  "clean": true,
+  "structure_preserved": true
+}</pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="tools-section">
+            <h2 class="tools-title">Tools & Frameworks for Each Stage</h2>
+            <div class="tools-grid">
+                <div class="tool-card">
+                    <h4>🌐 HTML Parsing</h4>
+                    <p><strong>Primary:</strong> BeautifulSoup - Python library for parsing HTML/XML documents with simple, Pythonic navigation methods</p>
+                    <div class="alternatives">
+                        <strong>Alternatives:</strong><br>
+                        • lxml - Faster C-based parser<br>
+                        • html5lib - Standards-compliant parser<br>
+                        • Scrapy - Full scraping framework<br>
+                        • Parsel - CSS/XPath selectors
+                    </div>
+                </div>
+
+                <div class="tool-card">
+                    <h4>🧹 Content Cleaning</h4>
+                    <p><strong>Primary:</strong> Custom CSS Selectors - Target specific elements to remove (nav, footer, ads, scripts) using BeautifulSoup's .select() method</p>
+                    <div class="alternatives">
+                        <strong>Alternatives:</strong><br>
+                        • bleach - HTML sanitization library<br>
+                        • html2text - Convert HTML to markdown<br>
+                        • readability-lxml - Extract article content<br>
+                        • trafilatura - Web scraping library
+                    </div>
+                </div>
+
+                <div class="tool-card">
+                    <h4>✂️ Text Extraction</h4>
+                    <p><strong>Primary:</strong> get_text() method - BeautifulSoup's built-in text extraction with separator and strip options</p>
+                    <div class="alternatives">
+                        <strong>Alternatives:</strong><br>
+                        • newspaper3k - Article extraction<br>
+                        • goose3 - Content extraction<br>
+                        • jusText - Boilerplate removal<br>
+                        • dragnet - Machine learning extraction
+                    </div>
+                </div>
+
+                <div class="tool-card">
+                    <h4>Text Normalization</h4>
+                    <p><strong>Primary:</strong> Python string methods - Strip whitespace, join/split for cleaning, regex for pattern matching</p>
+                    <div class="alternatives">
+                        <strong>Alternatives:</strong><br>
+                        • NLTK - Natural language toolkit<br>
+                        • spaCy - Industrial NLP library<br>
+                        • ftfy - Fix text encoding issues<br>
+                        • unicodedata - Unicode normalization
+                    </div>
+                </div>
+
+                <div class="tool-card">
+                    <h4>Data Structuring</h4>
+                    <p><strong>Primary:</strong> Python dictionaries/Pydantic - Create structured data models with type validation and JSON serialization</p>
+                    <div class="alternatives">
+                        <strong>Alternatives:</strong><br>
+                        • dataclasses - Built-in data classes<br>
+                        • attrs - Classes without boilerplate<br>
+                        • marshmallow - Object serialization<br>
+                        • cattrs - Structuring/unstructuring data
+                    </div>
+                </div>
+
+                <div class="tool-card">
+                    <h4>Content Detection</h4>
+                    <p><strong>Primary:</strong> Heuristics - Use semantic HTML tags (article, main, section) and content density analysis</p>
+                    <div class="alternatives">
+                        <strong>Alternatives:</strong><br>
+                        • readability - Mozilla's algorithm<br>
+                        • boilerpipe - Java-based extraction<br>
+                        • AutoExtract - ML-based extraction<br>
+                        • Diffbot - Commercial API service
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const stages = document.querySelectorAll('.stage');
+        const arrows = document.querySelectorAll('.arrow');
+        const animateBtn = document.getElementById('animateBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const statusMessage = document.getElementById('statusMessage');
+        
+        let currentStage = -1;
+        let animationInterval;
+        let isAnimating = false;
+
+        const stageMessages = [
+            "📄 Step 1: Fetching raw HTML from website...",
+            "🧹 Step 2: Removing navigation, ads, and footers...",
+            "✂️ Step 3: Extracting main content and text...",
+            "📏 Step 4: Normalizing whitespace and formatting...",
+            "📦 Step 5: Complete! Data packaged as structured JSON ✅"
+        ];
+
+        stages.forEach((stage, index) => {
+            stage.addEventListener('click', () => {
+                if (isAnimating) return;
+                
+                stages.forEach(s => s.classList.remove('active'));
+                arrows.forEach(a => a.classList.remove('active'));
+                stage.classList.add('active');
+                currentStage = index;
+                
+                // Activate arrows up to current stage
+                for (let i = 0; i < index; i++) {
+                    arrows[i].classList.add('active');
+                }
+                
+                showMessage(stageMessages[index]);
+            });
+        });
+
+        animateBtn.addEventListener('click', () => {
+            if (isAnimating) return;
+            
+            isAnimating = true;
+            animateBtn.disabled = true;
+            resetBtn.disabled = true;
+            
+            resetStages();
+            currentStage = -1;
+            
+            animationInterval = setInterval(() => {
+                currentStage++;
+                
+                if (currentStage >= stages.length) {
+                    clearInterval(animationInterval);
+                    animationInterval = null;
+                    isAnimating = false;
+                    animateBtn.disabled = false;
+                    resetBtn.disabled = false;
+                    return;
+                }
+                
+                // Remove previous active states
+                stages.forEach(s => s.classList.remove('active'));
+                arrows.forEach(a => a.classList.remove('active'));
+                
+                // Add active state to current stage
+                stages[currentStage].classList.add('active');
+                
+                // Activate all arrows up to current stage
+                for (let i = 0; i < currentStage; i++) {
+                    arrows[i].classList.add('active');
+                }
+                
+                // Update message
+                showMessage(stageMessages[currentStage]);
+                
+            }, 2000); // 2 seconds per stage
+        });
+
+        resetBtn.addEventListener('click', () => {
+            if (animationInterval) {
+                clearInterval(animationInterval);
+                animationInterval = null;
+            }
+            isAnimating = false;
+            animateBtn.disabled = false;
+            resetBtn.disabled = false;
+            resetStages();
+            statusMessage.classList.remove('show');
+        });
+
+        function resetStages() {
+            stages.forEach(s => s.classList.remove('active'));
+            arrows.forEach(a => a.classList.remove('active'));
+            currentStage = -1;
+        }
+
+        function showMessage(message) {
+            statusMessage.textContent = message;
+            statusMessage.classList.add('show');
+        }
+    </script>
+</body>
+</html>

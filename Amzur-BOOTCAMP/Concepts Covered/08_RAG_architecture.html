@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG (Retrieval-Augmented Generation) Architecture</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+
+        .info-box {
+            background: #e6fffa;
+            border-left: 4px solid #319795;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 30px 0;
+        }
+
+        .info-box strong {
+            color: #234e52;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        .info-box p {
+            color: #285e61;
+            line-height: 1.6;
+        }
+
+        nav {
+            background: #f8f9fa;
+            padding: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 3px solid #667eea;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        nav span {
+            text-decoration: none;
+            color: #667eea;
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: all 0.3s;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        nav span:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .comparison-section {
+            margin: 50px 0;
+        }
+
+        .comparison-title {
+            font-size: 2em;
+            color: #2d3748;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .arch-card {
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .arch-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+        }
+
+        .traditional-card {
+            background: linear-gradient(135deg, #ffd1dc 0%, #ffa6c9 100%);
+            border: 3px solid #ec4899;
+        }
+
+        .rag-card {
+            background: linear-gradient(135deg, #c6f6d5 0%, #9ae6b4 100%);
+            border: 3px solid #38a169;
+        }
+
+        .arch-card h3 {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .traditional-card h3 {
+            color: #831843;
+        }
+
+        .rag-card h3 {
+            color: #22543d;
+        }
+
+        .arch-diagram {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin: 20px 0;
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .traditional-box {
+            background: linear-gradient(135deg, #ec4899 0%, #be185d 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            text-align: center;
+            margin: 10px 0;
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(236, 72, 153, 0.3);
+        }
+
+        .rag-boxes {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .rag-box {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            flex: 1;
+            min-width: 120px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.85em;
+            box-shadow: 0 4px 10px rgba(72, 187, 120, 0.3);
+        }
+
+        .pros-cons {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .pros-cons-column {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pros-cons h4 {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            color: #2d3748;
+        }
+
+        .pros-cons ul {
+            list-style: none;
+            padding: 0;
+            flex: 1;
+        }
+
+        .pros-cons li {
+            background: white;
+            padding: 10px 15px;
+            margin: 8px 0;
+            border-radius: 8px;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+
+        .traditional-card .pros-cons li {
+            border-left: 4px solid #ec4899;
+            color: #831843;
+        }
+
+        .rag-card .pros-cons li {
+            border-left: 4px solid #48bb78;
+            color: #22543d;
+        }
+
+        .rag-pipeline-section {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            padding: 40px;
+            border-radius: 15px;
+            margin: 50px 0;
+        }
+
+        .pipeline-title {
+            font-size: 2em;
+            color: #78350f;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .pipeline-flow {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .pipeline-step {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            border: 3px solid #d97706;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .pipeline-step h4 {
+            font-size: 1.3em;
+            color: #92400e;
+            margin-bottom: 15px;
+        }
+
+        .step-icon {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .step-description {
+            color: #92400e;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .components-section {
+            margin: 50px 0;
+        }
+
+        .components-title {
+            font-size: 2em;
+            color: #2d3748;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .components-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+        }
+
+        .component-card {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            padding: 30px;
+            border-radius: 15px;
+            border: 3px solid #3b82f6;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .component-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        .component-card h4 {
+            font-size: 1.5em;
+            color: #1e3a8a;
+            margin-bottom: 15px;
+        }
+
+        .component-card p {
+            color: #1e40af;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .component-features {
+            background: rgba(255,255,255,0.7);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .component-features h5 {
+            color: #1e3a8a;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+
+        .component-features ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .component-features li {
+            color: #1e40af;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+            font-size: 0.9em;
+        }
+
+        .architecture-flow {
+            background: #f7fafc;
+            padding: 40px;
+            border-radius: 15px;
+            margin: 50px 0;
+        }
+
+        .flow-title {
+            font-size: 2em;
+            color: #2d3748;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .flow-diagram {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            align-items: stretch;
+        }
+
+        .flow-component {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+            border: 3px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .flow-component:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .query-component {
+            border-color: #3b82f6;
+        }
+
+        .retrieval-component {
+            border-color: #8b5cf6;
+        }
+
+        .augmentation-component {
+            border-color: #10b981;
+        }
+
+        .generation-component {
+            border-color: #f59e0b;
+        }
+
+        .flow-component h4 {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .query-component h4 {
+            color: #1e40af;
+        }
+
+        .retrieval-component h4 {
+            color: #6d28d9;
+        }
+
+        .augmentation-component h4 {
+            color: #047857;
+        }
+
+        .generation-component h4 {
+            color: #d97706;
+        }
+
+        .component-item {
+            background: #f7fafc;
+            padding: 8px 12px;
+            margin: 8px 0;
+            border-radius: 6px;
+            font-size: 0.9em;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .query-component .component-item {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            color: #1e40af;
+        }
+
+        .retrieval-component .component-item {
+            background: linear-gradient(135deg, #e9d5ff 0%, #d8b4fe 100%);
+            color: #6d28d9;
+        }
+
+        .augmentation-component .component-item {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            color: #047857;
+        }
+
+        .generation-component .component-item {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: #d97706;
+        }
+
+        .tools-section {
+            margin-top: 50px;
+            background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
+            padding: 35px;
+            border-radius: 15px;
+            color: white;
+        }
+
+        .tools-title {
+            font-size: 1.8em;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .tool-card {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .tool-card:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateY(-3px);
+        }
+
+        .tool-card h4 {
+            font-size: 1.3em;
+            margin-bottom: 10px;
+        }
+
+        .tool-card p {
+            font-size: 0.95em;
+            line-height: 1.6;
+            margin-bottom: 12px;
+            opacity: 0.95;
+        }
+
+        .tool-card .alternatives {
+            font-size: 0.85em;
+            background: rgba(0,0,0,0.2);
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+
+        .use-cases-section {
+            background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%);
+            padding: 40px;
+            border-radius: 15px;
+            margin: 50px 0;
+        }
+
+        .use-cases-title {
+            font-size: 2em;
+            color: #831843;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .use-cases-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .use-case-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            border: 3px solid #ec4899;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+        }
+
+        .use-case-card h4 {
+            font-size: 1.4em;
+            color: #be185d;
+            margin-bottom: 15px;
+        }
+
+        .use-case-card p {
+            color: #831843;
+            line-height: 1.6;
+            font-size: 0.95em;
+        }
+
+        @media (max-width: 768px) {
+            .comparison-grid,
+            .components-grid,
+            .use-cases-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .flow-diagram {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .pipeline-flow {
+                grid-template-columns: 1fr;
+            }
+            
+            .pros-cons {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .flow-diagram {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>RAG (Retrieval-Augmented Generation) Architecture</h1>
+        <p class="subtitle">
+            RAG combines the power of large language models with external knowledge bases to provide accurate, 
+            contextual, and up-to-date responses. This architecture retrieves relevant information from document 
+            stores and augments LLM prompts to generate informed, factual responses while reducing hallucinations.
+        </p>
+
+        <div class="info-box">
+            <strong>Why RAG Matters:</strong>
+            <p>
+                Large Language Models have knowledge cutoffs and can hallucinate information. RAG solves this by 
+                connecting LLMs to real-time, domain-specific knowledge bases. This enables AI applications to 
+                provide accurate answers about company documents, recent events, or specialized domains while 
+                maintaining the conversational capabilities of modern LLMs.
+            </p>
+        </div>
+
+        <nav id="navigation-menu">
+            <ul>
+                <li><span onclick="document.getElementById('traditional-vs-rag').scrollIntoView({behavior: 'smooth'})">Traditional vs RAG</span></li>
+                <li><span onclick="document.getElementById('rag-pipeline').scrollIntoView({behavior: 'smooth'})">RAG Pipeline</span></li>
+                <li><span onclick="document.getElementById('core-components').scrollIntoView({behavior: 'smooth'})">Core Components</span></li>
+                <li><span onclick="document.getElementById('communication-flow').scrollIntoView({behavior: 'smooth'})">Communication Flow</span></li>
+                <li><span onclick="document.getElementById('use-cases').scrollIntoView({behavior: 'smooth'})">Use Cases</span></li>
+                <li><span onclick="document.getElementById('tools-frameworks').scrollIntoView({behavior: 'smooth'})">Tools & Frameworks</span></li>
+            </ul>
+        </nav>
+
+        <div id="traditional-vs-rag" class="comparison-section">
+            <h2 class="comparison-title">Traditional LLM vs RAG Architecture</h2>
+            
+            <div class="comparison-grid">
+                <div class="arch-card traditional-card">
+                    <h3>Traditional LLM</h3>
+                    
+                    <div class="arch-diagram">
+                        <div class="traditional-box">User Query</div>
+                        <div class="traditional-box">LLM Processing</div>
+                        <div class="traditional-box">Generated Response</div>
+                        <div class="traditional-box">Based on Training Data Only</div>
+                    </div>
+                    
+                    <div class="pros-cons">
+                        <div class="pros-cons-column">
+                            <h4>Advantages:</h4>
+                            <ul>
+                                <li>• Simple architecture and implementation</li>
+                                <li>• Fast response times</li>
+                                <li>• Good for general knowledge queries</li>
+                                <li>• No external dependencies</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="pros-cons-column">
+                            <h4>Limitations:</h4>
+                            <ul>
+                                <li>• Knowledge cutoff limitations</li>
+                                <li>• Potential hallucinations</li>
+                                <li>• No access to real-time data</li>
+                                <li>• Can't reference specific documents</li>
+                                <li>• Limited domain-specific accuracy</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="arch-card rag-card">
+                    <h3>RAG Architecture</h3>
+                    
+                    <div class="arch-diagram">
+                        <div class="rag-boxes" style="margin-bottom: 20px;">
+                            <div class="rag-box">Query<br>Processing</div>
+                            <div class="rag-box">Vector<br>Search</div>
+                            <div class="rag-box">Context<br>Retrieval</div>
+                        </div>
+                        <div class="rag-boxes">
+                            <div class="rag-box">Prompt<br>Augmentation</div>
+                            <div class="rag-box">LLM<br>Generation</div>
+                            <div class="rag-box">Cited<br>Response</div>
+                        </div>
+                    </div>
+                    
+                    <div class="pros-cons">
+                        <div class="pros-cons-column">
+                            <h4>Advantages:</h4>
+                            <ul>
+                                <li>• Access to real-time, specific knowledge</li>
+                                <li>• Reduced hallucinations</li>
+                                <li>• Citeable and traceable responses</li>
+                                <li>• Domain-specific accuracy</li>
+                                <li>• Updatable knowledge base</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="pros-cons-column">
+                            <h4>Challenges:</h4>
+                            <ul>
+                                <li>• More complex architecture</li>
+                                <li>• Higher latency due to retrieval</li>
+                                <li>• Requires vector database setup</li>
+                                <li>• Document preprocessing needed</li>
+                                <li>• Quality depends on retrieval accuracy</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="rag-pipeline" class="rag-pipeline-section">
+            <h2 class="pipeline-title">RAG Pipeline: From Documents to Answers</h2>
+            
+            <div class="pipeline-flow">
+                <div class="pipeline-step">
+                    <div class="step-icon">1</div>
+                    <h4>Document Ingestion</h4>
+                    <div class="step-description">
+                        Load and preprocess documents (PDFs, text files, web pages) into manageable chunks for embedding generation.
+                    </div>
+                </div>
+
+                <div class="pipeline-step">
+                    <div class="step-icon">2</div>
+                    <h4>Embedding & Indexing</h4>
+                    <div class="step-description">
+                        Convert text chunks into vector embeddings using models like OpenAI Ada or Sentence Transformers, then store in vector database.
+                    </div>
+                </div>
+
+                <div class="pipeline-step">
+                    <div class="step-icon">3</div>
+                    <h4>Query & Retrieval</h4>
+                    <div class="step-description">
+                        Convert user query to embedding, perform similarity search to find most relevant document chunks from vector store.
+                    </div>
+                </div>
+            </div>
+
+            <div class="pipeline-flow">
+                <div class="pipeline-step">
+                    <div class="step-icon">4</div>
+                    <h4>Context Assembly</h4>
+                    <div class="step-description">
+                        Combine retrieved chunks with user query to create enriched prompt with relevant context and source citations.
+                    </div>
+                </div>
+
+                <div class="pipeline-step">
+                    <div class="step-icon">5</div>
+                    <h4>LLM Generation</h4>
+                    <div class="step-description">
+                        Send augmented prompt to LLM (GPT-4, Claude, etc.) to generate response based on retrieved context and query.
+                    </div>
+                </div>
+
+                <div class="pipeline-step">
+                    <div class="step-icon">6</div>
+                    <h4>Response & Citations</h4>
+                    <div class="step-description">
+                        Return generated response with source references, enabling users to verify information and explore original documents.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="core-components" class="components-section">
+            <h2 class="components-title">Core RAG Components</h2>
+            
+            <div class="components-grid">
+                <div class="component-card">
+                    <h4>Document Store</h4>
+                    <p>Repository of knowledge base documents that provides the factual foundation for RAG responses.</p>
+                    
+                    <div class="component-features">
+                        <h5>Key Features:</h5>
+                        <ul>
+                            <li>• Multiple format support (PDF, DOC, HTML, TXT)</li>
+                            <li>• Metadata storage (source, date, author)</li>
+                            <li>• Version control for document updates</li>
+                            <li>• Hierarchical organization</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="component-features">
+                        <h5>Examples:</h5>
+                        <ul>
+                            <li>• Company documentation repositories</li>
+                            <li>• Research paper databases</li>
+                            <li>• Product manuals and guides</li>
+                            <li>• Legal document collections</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="component-card">
+                    <h4>Vector Database</h4>
+                    <p>Specialized database optimized for storing and searching high-dimensional vector embeddings with semantic similarity.</p>
+                    
+                    <div class="component-features">
+                        <h5>Key Features:</h5>
+                        <ul>
+                            <li>• Efficient similarity search (cosine, euclidean)</li>
+                            <li>• Scalable indexing algorithms (HNSW, IVF)</li>
+                            <li>• Real-time insertions and updates</li>
+                            <li>• Metadata filtering capabilities</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="component-features">
+                        <h5>Popular Options:</h5>
+                        <ul>
+                            <li>• Pinecone - Managed vector database</li>
+                            <li>• Weaviate - Open-source with GraphQL</li>
+                            <li>• Chroma - Lightweight, embedded option</li>
+                            <li>• Qdrant - High-performance with filtering</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="component-card">
+                    <h4>Embedding Model</h4>
+                    <p>Neural network that converts text into dense vector representations, capturing semantic meaning for similarity matching.</p>
+                    
+                    <div class="component-features">
+                        <h5>Key Features:</h5>
+                        <ul>
+                            <li>• Semantic understanding beyond keywords</li>
+                            <li>• Consistent vector dimensions</li>
+                            <li>• Language and domain adaptability</li>
+                            <li>• Batch processing capabilities</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="component-features">
+                        <h5>Model Options:</h5>
+                        <ul>
+                            <li>• OpenAI text-embedding-ada-002</li>
+                            <li>• Sentence Transformers (open-source)</li>
+                            <li>• Cohere Embed models</li>
+                            <li>• Custom fine-tuned models</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="component-card">
+                    <h4>Retrieval Engine</h4>
+                    <p>Core system that orchestrates query processing, similarity search, and result ranking to find most relevant context.</p>
+                    
+                    <div class="component-features">
+                        <h5>Key Features:</h5>
+                        <ul>
+                            <li>• Query preprocessing and optimization</li>
+                            <li>• Hybrid search (vector + keyword)</li>
+                            <li>• Result reranking algorithms</li>
+                            <li>• Configurable similarity thresholds</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="component-features">
+                        <h5>Advanced Techniques:</h5>
+                        <ul>
+                            <li>• Multi-query retrieval strategies</li>
+                            <li>• Contextual compression</li>
+                            <li>• Recursive retrieval for complex queries</li>
+                            <li>• Source diversity optimization</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="communication-flow" class="architecture-flow">
+            <h2 class="flow-title">RAG Communication Flow</h2>
+            
+            <div class="flow-diagram">
+                <div class="flow-component query-component">
+                    <h4>Query Processing</h4>
+                    <div class="component-item">User Input</div>
+                    <div class="component-item">Query Analysis</div>
+                    <div class="component-item">Intent Detection</div>
+                    <div class="component-item">Query Embedding</div>
+                    <div class="component-item">Search Parameters</div>
+                </div>
+
+                <div class="flow-component retrieval-component">
+                    <h4>Context Retrieval</h4>
+                    <div class="component-item">Vector Search</div>
+                    <div class="component-item">Similarity Ranking</div>
+                    <div class="component-item">Result Filtering</div>
+                    <div class="component-item">Context Assembly</div>
+                    <div class="component-item">Source Tracking</div>
+                </div>
+
+                <div class="flow-component augmentation-component">
+                    <h4>Prompt Augmentation</h4>
+                    <div class="component-item">Context Integration</div>
+                    <div class="component-item">Prompt Template</div>
+                    <div class="component-item">Token Management</div>
+                    <div class="component-item">Instruction Tuning</div>
+                    <div class="component-item">Quality Control</div>
+                </div>
+
+                <div class="flow-component generation-component">
+                    <h4>Response Generation</h4>
+                    <div class="component-item">LLM Processing</div>
+                    <div class="component-item">Answer Synthesis</div>
+                    <div class="component-item">Citation Mapping</div>
+                    <div class="component-item">Response Validation</div>
+                    <div class="component-item">Output Formatting</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="use-cases" class="use-cases-section">
+            <h2 class="use-cases-title">RAG Use Cases & Applications</h2>
+            
+            <div class="use-cases-grid">
+                <div class="use-case-card">
+                    <h4>Enterprise Knowledge Management</h4>
+                    <p>
+                        <strong>Internal Documentation:</strong> Help employees quickly find answers from company policies, 
+                        procedures, and knowledge bases. Reduces support tickets and improves productivity by making 
+                        institutional knowledge instantly searchable.
+                    </p>
+                </div>
+
+                <div class="use-case-card">
+                    <h4>Healthcare & Research</h4>
+                    <p>
+                        <strong>Medical Literature:</strong> Assist doctors and researchers by providing evidence-based 
+                        answers from medical journals, clinical guidelines, and research papers with proper citations 
+                        for clinical decision making.
+                    </p>
+                </div>
+
+                <div class="use-case-card">
+                    <h4>Legal Document Analysis</h4>
+                    <p>
+                        <strong>Case Law & Regulations:</strong> Enable lawyers to quickly research precedents, 
+                        regulations, and legal documents. Provides contextual answers with specific citations to 
+                        relevant sections and cases.
+                    </p>
+                </div>
+
+                <div class="use-case-card">
+                    <h4>Educational Content</h4>
+                    <p>
+                        <strong>Learning Assistance:</strong> Create intelligent tutoring systems that can answer 
+                        student questions based on course materials, textbooks, and educational resources with 
+                        accurate source references.
+                    </p>
+                </div>
+
+                <div class="use-case-card">
+                    <h4>Technical Support</h4>
+                    <p>
+                        <strong>Product Documentation:</strong> Provide instant technical support by searching through 
+                        user manuals, troubleshooting guides, and FAQ databases to resolve customer issues efficiently.
+                    </p>
+                </div>
+
+                <div class="use-case-card">
+                    <h4>News & Current Events</h4>
+                    <p>
+                        <strong>Information Synthesis:</strong> Aggregate and synthesize information from multiple news 
+                        sources, reports, and articles to provide comprehensive, fact-checked responses on current events.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div id="tools-frameworks" class="tools-section">
+            <h2 class="tools-title">RAG Tools & Frameworks</h2>
+            <div class="tools-grid">
+                <div class="tool-card">
+                    <h4>🦜 LangChain</h4>
+                    <p><strong>Primary:</strong> Comprehensive framework for building LLM applications with built-in RAG components, document loaders, and vector store integrations</p>
+                    <div class="alternatives">
+                        <strong>Key Features:</strong><br>
+                        • Document loaders for 50+ formats<br>
+                        • Text splitters and chunking strategies<br>
+                        • Vector store abstractions<br>
+                        • Retrieval chains and agents<br>
+                        • Memory and conversation management
+                    </div>
+                </div>
+
+                <div class="tool-card">
+                    <h4>LlamaIndex</h4>
+                    <p><strong>Alternative:</strong> Specialized framework focused on connecting LLMs with structured and unstructured data through advanced indexing strategies</p>
+                    <div class="alternatives">
+                        <strong>Strengths:</strong><br>
+                        • Advanced indexing algorithms<br>
+                        • Query engines with routing<br>
+                        • Graph-based retrieval<br>
+                        • Multi-modal document support<br>
+                        • Evaluation and benchmarking tools
+                    </div>
+                </div>
+
+                <div class="tool-card">
+                    <h4>Pinecone</h4>
+                    <p><strong>Vector Database:</strong> Managed vector database service optimized for similarity search with built-in scaling and performance optimization</p>
+                    <div class="alternatives">
+                        <strong>Alternatives:</strong><br>
+                        • Weaviate - Open source with GraphQL API<br>
+                        • Chroma - Lightweight embedded option<br>
+                        • Qdrant - Rust-based high performance<br>
+                        • Milvus - Cloud-native vector database
+                    </div>
+                </div>
+
+                <div class="tool-card">
+                    <h4>Sentence Transformers</h4>
+                    <p><strong>Embeddings:</strong> Open-source library providing pre-trained models for generating high-quality sentence and document embeddings</p>
+                    <div class="alternatives">
+                        <strong>Model Options:</strong><br>
+                        • all-MiniLM-L6-v2 - Balanced speed/quality<br>
+                        • all-mpnet-base-v2 - High quality<br>
+                        • OpenAI text-embedding-ada-002<br>
+                        • Cohere embed-multilingual-v2.0
+                    </div>
+                </div>
+
+                <div class="tool-card">
+                    <h4>Unstructured</h4>
+                    <p><strong>Document Processing:</strong> Library for preprocessing and extracting content from various document formats for RAG pipelines</p>
+                    <div class="alternatives">
+                        <strong>Supported Formats:</strong><br>
+                        • PDFs, Word docs, PowerPoints<br>
+                        • HTML, XML, Markdown<br>
+                        • Images with OCR (Tesseract)<br>
+                        • Email formats (MSG, EML)<br>
+                        • Tables and structured data
+                    </div>
+                </div>
+
+                <div class="tool-card">
+                    <h4>Haystack</h4>
+                    <p><strong>End-to-End Framework:</strong> Production-ready framework for building search and question-answering systems with RAG capabilities</p>
+                    <div class="alternatives">
+                        <strong>Components:</strong><br>
+                        • Document stores and retrievers<br>
+                        • Question answering pipelines<br>
+                        • Evaluation and annotation tools<br>
+                        • REST API generation<br>
+                        • Streamlit UI components
+                    </div>
+                </div>
+
+                <div class="tool-card">
+                    <h4>FastAPI + Streamlit</h4>
+                    <p><strong>Application Stack:</strong> Complete web application stack for building interactive RAG applications with Python</p>
+                    <div class="alternatives">
+                        <strong>Architecture:</strong><br>
+                        • FastAPI backend for RAG processing<br>
+                        • Streamlit frontend for user interface<br>
+                        • Async processing capabilities<br>
+                        • Automatic API documentation<br>
+                        • Easy deployment and scaling
+                    </div>
+                </div>
+
+                <div class="tool-card">
+                    <h4>Docker & Deployment</h4>
+                    <p><strong>Infrastructure:</strong> Containerization and deployment tools for scalable RAG applications in production environments</p>
+                    <div class="alternatives">
+                        <strong>Deployment Options:</strong><br>
+                        • Docker containers for consistency<br>
+                        • Kubernetes for orchestration<br>
+                        • Cloud services (AWS, GCP, Azure)<br>
+                        • Serverless functions for scaling<br>
+                        • Load balancers for high availability
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

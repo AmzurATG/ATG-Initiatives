@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Agent vs Agentic AI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        /* Spectrum Section */
+        .spectrum-section {
+            margin-bottom: 50px;
+        }
+
+        .spectrum-title {
+            text-align: center;
+            font-size: 1.8em;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+
+        .spectrum-container {
+            position: relative;
+            background: linear-gradient(90deg, #e74c3c, #f39c12, #f1c40f, #27ae60);
+            height: 120px;
+            border-radius: 60px;
+            margin: 20px 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .spectrum-labels {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+        }
+
+        .spectrum-label {
+            text-align: center;
+            color: #2c3e50;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .spectrum-points {
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 30px;
+            transform: translateY(-50%);
+        }
+
+        .spectrum-point {
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .spectrum-point:hover {
+            transform: scale(1.3);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Comparison Section */
+        .comparison-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 50px;
+        }
+
+        .comparison-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .ai-agent-card {
+            border-color: #e74c3c;
+        }
+
+        .agentic-ai-card {
+            border-color: #27ae60;
+        }
+
+        .comparison-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8em;
+            color: white;
+        }
+
+        .ai-agent-icon {
+            background: #e74c3c;
+        }
+
+        .agentic-ai-icon {
+            background: #27ae60;
+        }
+
+        .card-title {
+            font-size: 1.5em;
+            color: #2c3e50;
+        }
+
+        .characteristics-grid {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .characteristic {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .characteristic:hover {
+            background: #e3f2fd;
+        }
+
+        .characteristic-icon {
+            font-size: 1.2em;
+        }
+
+        .characteristic-text {
+            color: #555;
+            font-size: 0.95em;
+        }
+
+        /* Examples Section */
+        .examples-section {
+            margin-bottom: 50px;
+        }
+
+        .examples-title {
+            text-align: center;
+            font-size: 1.8em;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+
+        .examples-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .example-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #667eea;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .example-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .example-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .example-title {
+            font-size: 1.1em;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .example-type {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            color: white;
+            font-weight: 600;
+        }
+
+        .ai-agent-type {
+            background: #e74c3c;
+        }
+
+        .agentic-ai-type {
+            background: #27ae60;
+        }
+
+        .example-description {
+            color: #666;
+            font-size: 0.9em;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .autonomy-meter {
+            background: #f0f0f0;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .autonomy-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .autonomy-label {
+            font-size: 0.8em;
+            color: #888;
+            text-align: center;
+        }
+
+        /* Key Differences Section */
+        .differences-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .differences-title {
+            text-align: center;
+            font-size: 1.8em;
+            color: #2c3e50;
+            margin-bottom: 25px;
+        }
+
+        .differences-table {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .table-header {
+            background: #2c3e50;
+            color: white;
+            padding: 15px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .table-row {
+            display: contents;
+        }
+
+        .table-cell {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            text-align: center;
+        }
+
+        .aspect-cell {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+
+        .ai-agent-cell {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+
+        .agentic-ai-cell {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+
+        @media (max-width: 768px) {
+            .comparison-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .differences-table {
+                grid-template-columns: 1fr;
+            }
+            
+            .table-cell {
+                text-align: left;
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>AI Agent vs Agentic AI</h1>
+            <p>Understanding the spectrum of artificial intelligence autonomy and agency</p>
+        </div>
+
+        <!-- Spectrum Section -->
+        <div class="spectrum-section">
+            <h2 class="spectrum-title">The AI Agency Spectrum</h2>
+            <div class="spectrum-container">
+                <div class="spectrum-points">
+                    <div class="spectrum-point" data-level="basic" title="Basic Agents"></div>
+                    <div class="spectrum-point" data-level="smart" title="Smart Agents"></div>
+                    <div class="spectrum-point" data-level="autonomous" title="Autonomous Agents"></div>
+                    <div class="spectrum-point" data-level="agentic" title="Agentic AI"></div>
+                </div>
+            </div>
+            <div class="spectrum-labels">
+                <div class="spectrum-label">Basic Agents<br><small>Rule-based, Reactive</small></div>
+                <div class="spectrum-label">Smart Agents<br><small>Pattern Recognition</small></div>
+                <div class="spectrum-label">Autonomous Agents<br><small>Goal-directed</small></div>
+                <div class="spectrum-label">Agentic AI<br><small>Self-directed, Strategic</small></div>
+            </div>
+        </div>
+
+        <!-- Comparison Section -->
+        <div class="comparison-section">
+            <div class="comparison-card ai-agent-card">
+                <div class="card-header">
+                    <div class="card-icon ai-agent-icon">🤖</div>
+                    <div class="card-title">AI Agent</div>
+                </div>
+                <div class="characteristics-grid">
+                    <div class="characteristic">
+                        <span class="characteristic-icon">⚙️</span>
+                        <span class="characteristic-text">System architecture & framework</span>
+                    </div>
+                    <div class="characteristic">
+                        <span class="characteristic-icon">📋</span>
+                        <span class="characteristic-text">Pre-defined goals & tasks</span>
+                    </div>
+                    <div class="characteristic">
+                        <span class="characteristic-icon">🔄</span>
+                        <span class="characteristic-text">Reactive to stimuli</span>
+                    </div>
+                    <div class="characteristic">
+                        <span class="characteristic-icon">📏</span>
+                        <span class="characteristic-text">Variable autonomy levels</span>
+                    </div>
+                    <div class="characteristic">
+                        <span class="characteristic-icon">🎯</span>
+                        <span class="characteristic-text">Task-specific optimization</span>
+                    </div>
+                    <div class="characteristic">
+                        <span class="characteristic-icon">👥</span>
+                        <span class="characteristic-text">Requires human oversight</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="comparison-card agentic-ai-card">
+                <div class="card-header">
+                    <div class="card-icon agentic-ai-icon">🚀</div>
+                    <div class="card-title">Agentic AI</div>
+                </div>
+                <div class="characteristics-grid">
+                    <div class="characteristic">
+                        <span class="characteristic-icon">🧠</span>
+                        <span class="characteristic-text">Behavioral capability & quality</span>
+                    </div>
+                    <div class="characteristic">
+                        <span class="characteristic-icon">🎪</span>
+                        <span class="characteristic-text">Self-directed goal setting</span>
+                    </div>
+                    <div class="characteristic">
+                        <span class="characteristic-icon">⚡</span>
+                        <span class="characteristic-text">Proactive behavior</span>
+                    </div>
+                    <div class="characteristic">
+                        <span class="characteristic-icon">🔝</span>
+                        <span class="characteristic-text">High autonomy required</span>
+                    </div>
+                    <div class="characteristic">
+                        <span class="characteristic-icon">🌐</span>
+                        <span class="characteristic-text">Multi-domain reasoning</span>
+                    </div>
+                    <div class="characteristic">
+                        <span class="characteristic-icon">🔓</span>
+                        <span class="characteristic-text">Minimal human intervention</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Differences Table -->
+        <div class="differences-section">
+            <h2 class="differences-title">Key Differences</h2>
+            <div class="differences-table">
+                <div class="table-header">Aspect</div>
+                <div class="table-header">AI Agent</div>
+                <div class="table-header">Agentic AI</div>
+                
+                <div class="table-row">
+                    <div class="table-cell aspect-cell">Concept</div>
+                    <div class="table-cell ai-agent-cell">System architecture</div>
+                    <div class="table-cell agentic-ai-cell">Behavioral characteristic</div>
+                </div>
+                
+                <div class="table-row">
+                    <div class="table-cell aspect-cell">Scope</div>
+                    <div class="table-cell ai-agent-cell">Broad category</div>
+                    <div class="table-cell agentic-ai-cell">Subset of advanced agents</div>
+                </div>
+                
+                <div class="table-row">
+                    <div class="table-cell aspect-cell">Decision Making</div>
+                    <div class="table-cell ai-agent-cell">Rule-based or simple</div>
+                    <div class="table-cell agentic-ai-cell">Sophisticated reasoning</div>
+                </div>
+                
+                <div class="table-row">
+                    <div class="table-cell aspect-cell">Goal Setting</div>
+                    <div class="table-cell ai-agent-cell">Pre-defined goals</div>
+                    <div class="table-cell agentic-ai-cell">Can set own sub-goals</div>
+                </div>
+                
+                <div class="table-row">
+                    <div class="table-cell aspect-cell">Autonomy</div>
+                    <div class="table-cell ai-agent-cell">Variable levels</div>
+                    <div class="table-cell agentic-ai-cell">High autonomy</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Examples Section -->
+        <div class="examples-section">
+            <h2 class="examples-title">Real-World Examples</h2>
+            <div class="examples-grid" id="examplesGrid">
+                <!-- Examples will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Examples data
+        const examples = [
+            {
+                title: "Email Spam Filter",
+                type: "ai-agent",
+                description: "Classifies emails as spam or legitimate using pre-trained rules. Reactive system that responds to input patterns.",
+                autonomy: 25
+            },
+            {
+                title: "Smart Thermostat",
+                type: "ai-agent", 
+                description: "Maintains temperature based on schedules and learns basic patterns. Limited to predefined optimization parameters.",
+                autonomy: 40
+            },
+            {
+                title: "Chess AI (Stockfish)",
+                type: "ai-agent",
+                description: "Calculates optimal chess moves using minimax algorithms. High performance but purely reactive to board state.",
+                autonomy: 60
+            },
+            {
+                title: "Netflix Recommendations",
+                type: "ai-agent",
+                description: "Suggests content based on viewing patterns. Adapts to user behavior but doesn't set its own goals.",
+                autonomy: 50
+            },
+            {
+                title: "AutoGPT Research Assistant",
+                type: "agentic-ai",
+                description: "Conducts comprehensive research by breaking down questions, searching sources, and synthesizing findings independently.",
+                autonomy: 85
+            },
+            {
+                title: "Autonomous Software Developer",
+                type: "agentic-ai",
+                description: "Develops complete applications from requirements, makes architectural decisions, and iterates based on feedback.",
+                autonomy: 90
+            },
+            {
+                title: "AI Investment Manager",
+                type: "agentic-ai",
+                description: "Manages portfolios by analyzing markets, developing strategies, and making real-time trading decisions autonomously.",
+                autonomy: 88
+            },
+            {
+                title: "Scientific Discovery Agent",
+                type: "agentic-ai",
+                description: "Conducts original research by formulating hypotheses, designing experiments, and publishing findings independently.",
+                autonomy: 95
+            }
+        ];
+
+        // Populate examples
+        function populateExamples() {
+            const grid = document.getElementById('examplesGrid');
+            grid.innerHTML = examples.map(example => `
+                <div class="example-card" onclick="showExampleDetails('${example.title}')">
+                    <div class="example-header">
+                        <div class="example-title">${example.title}</div>
+                        <div class="example-type ${example.type}-type">
+                            ${example.type === 'ai-agent' ? 'AI Agent' : 'Agentic AI'}
+                        </div>
+                    </div>
+                    <div class="example-description">${example.description}</div>
+                    <div class="autonomy-meter">
+                        <div class="autonomy-fill" style="width: ${example.autonomy}%; background: ${example.type === 'ai-agent' ? '#e74c3c' : '#27ae60'};"></div>
+                    </div>
+                    <div class="autonomy-label">Autonomy Level: ${example.autonomy}%</div>
+                </div>
+            `).join('');
+        }
+
+        // Spectrum point interactions
+        document.querySelectorAll('.spectrum-point').forEach(point => {
+            point.addEventListener('click', function() {
+                const level = this.getAttribute('data-level');
+                showSpectrumInfo(level);
+            });
+        });
+
+        function showSpectrumInfo(level) {
+            const info = {
+                'basic': 'Basic Agents: Rule-based systems that respond to specific inputs with predetermined outputs. Example: Simple chatbots, automatic doors.',
+                'smart': 'Smart Agents: Systems that can recognize patterns and adapt responses. Example: Recommendation systems, smart home devices.',
+                'autonomous': 'Autonomous Agents: Goal-directed systems that can plan and execute multi-step tasks. Example: GPS navigation, game AI.',
+                'agentic': 'Agentic AI: Fully autonomous systems that set their own goals and operate independently. Example: AI researchers, autonomous software developers.'
+            };
+            
+            alert(info[level] || 'Information not available');
+        }
+
+        function showExampleDetails(title) {
+            const example = examples.find(e => e.title === title);
+            if (example) {
+                const details = `
+                    ${example.title}
+                    
+                    Type: ${example.type === 'ai-agent' ? 'AI Agent' : 'Agentic AI'}
+                    Autonomy Level: ${example.autonomy}%
+                    
+                    Description: ${example.description}
+                `;
+                alert(details);
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            populateExamples();
+        });
+    </script>
+</body>
+</html>

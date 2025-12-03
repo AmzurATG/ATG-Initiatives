@@ -1,0 +1,1749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATG Learning Frameworks - Amzur Technologies</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header .subtitle {
+            color: #666;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+
+        .header .description {
+            color: #888;
+            font-size: 0.95em;
+            max-width: 900px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Tab Navigation */
+        .tab-navigation {
+            background: white;
+            border-radius: 12px;
+            padding: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            gap: 10px;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 20px 30px;
+            background: #f5f5f5;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tab-button:hover {
+            background: #e8e8e8;
+            transform: translateY(-2px);
+        }
+
+        .tab-button.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .tab-button .tab-icon {
+            font-size: 1.5em;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .tab-button .tab-label {
+            display: block;
+            font-size: 0.9em;
+        }
+
+        .tab-button .tab-count {
+            display: block;
+            font-size: 0.75em;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { 
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stats {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .category-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .category-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .category-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .category-number {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 35px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+        }
+
+        .category-title {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .category-description {
+            color: #666;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        .subcategory-count {
+            display: inline-block;
+            background: #f0f0f0;
+            color: #667eea;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            margin-top: 15px;
+            font-weight: 600;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            animation: fadeInModal 0.3s ease;
+        }
+
+        @keyframes fadeInModal {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 3% auto;
+            padding: 0;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 85vh;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { 
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to { 
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 25px 30px;
+            position: relative;
+        }
+
+        .modal-header h2 {
+            font-size: 1.8em;
+            margin-bottom: 5px;
+        }
+
+        .modal-header .category-num {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .close {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            color: white;
+            font-size: 32px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.3s ease;
+        }
+
+        .close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-body {
+            padding: 30px;
+            overflow-y: auto;
+            max-height: calc(85vh - 100px);
+        }
+
+        .subcategory-item {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .subcategory-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .subcategory-title {
+            font-size: 1.2em;
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .subcategory-title::before {
+            content: '●';
+            margin-right: 10px;
+            font-size: 0.8em;
+        }
+
+        .subcategory-topics {
+            list-style: none;
+            padding-left: 25px;
+        }
+
+        .subcategory-topics li {
+            color: #555;
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+            line-height: 1.6;
+        }
+
+        .subcategory-topics li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: #764ba2;
+        }
+
+        .footer {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            color: #666;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .modal-content {
+                width: 95%;
+                margin: 5% auto;
+            }
+
+            .stats {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .tab-navigation {
+                flex-direction: column;
+            }
+
+            .tab-button {
+                padding: 15px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>ATG Learning Frameworks 2025</h1>
+            <div class="subtitle">Advanced Technology Group - Amzur Technologies</div>
+            <!-- <div class="description">
+                Comprehensive learning roadmaps covering AI/ML technologies and software engineering excellence. 
+                Building world-class developers who can architect, develop, and deploy production-ready intelligent applications.
+            </div> -->
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="tab-navigation">
+            <button class="tab-button active" onclick="switchTab('ai')" id="aiTab">
+                <!-- <span class="tab-icon">🤖</span> -->
+                <span class="tab-label">AI Learning Framework</span>
+                <span class="tab-count">12 Categories • 44 Sub-categories</span>
+            </button>
+            <button class="tab-button" onclick="switchTab('se')" id="seTab">
+                <!-- <span class="tab-icon">⚙️</span> -->
+                <span class="tab-label">Software Engineering Excellence</span>
+                <span class="tab-count">16 Categories • 64 Sub-categories</span>
+            </button>
+        </div>
+
+        <!-- AI Learning Framework Tab Content -->
+        <div id="aiContent" class="tab-content active">
+            <!-- <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-number">12</div>
+                    <div class="stat-label">Major Categories</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">44</div>
+                    <div class="stat-label">Sub-Categories</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">50-75</div>
+                    <div class="stat-label">Target Topics</div>
+                </div>
+            </div> -->
+
+            <div class="grid-container" id="aiCategoryGrid">
+                <!-- AI Categories will be dynamically inserted here -->
+            </div>
+        </div>
+
+        <!-- Software Engineering Excellence Tab Content -->
+        <div id="seContent" class="tab-content">
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-number">16</div>
+                    <div class="stat-label">Major Categories</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">64</div>
+                    <div class="stat-label">Sub-Categories</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">50-75</div>
+                    <div class="stat-label">Target Topics</div>
+                </div>
+            </div>
+
+            <div class="grid-container" id="seCategoryGrid">
+                <!-- SE Categories will be dynamically inserted here -->
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong>ATG Learning Initiative 2025</strong> | Click any category to explore sub-topics</p>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="categoryModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close">&times;</span>
+                <div class="category-num" id="modalCategoryNum"></div>
+                <h2 id="modalTitle"></h2>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Subcategories will be dynamically inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // AI Learning Framework Data
+        const aiCategories = [
+            {
+                number: 1,
+                title: "Foundational AI & ML Concepts",
+                description: "Core principles of artificial intelligence and machine learning, including algorithms, training paradigms, and mathematical foundations.",
+                subcategories: [
+                    {
+                        title: "Core AI/ML Fundamentals",
+                        topics: [
+                            "Basic terminology and definitions",
+                            "Types of learning paradigms",
+                            "Model training and evaluation concepts",
+                            "Common algorithms overview"
+                        ]
+                    },
+                    {
+                        title: "Deep Learning Foundations",
+                        topics: [
+                            "Neural network architectures",
+                            "Training dynamics and optimization",
+                            "Common challenges and solutions",
+                            "Transfer learning concepts"
+                        ]
+                    },
+                    {
+                        title: "Mathematics & Statistics for AI",
+                        topics: [
+                            "Essential mathematical concepts",
+                            "Statistical foundations",
+                            "Probability and inference",
+                            "Data preprocessing principles"
+                        ]
+                    }
+                ]
+            },
+            {
+                number: 2,
+                title: "Large Language Models (LLMs)",
+                description: "Understanding transformer architectures, model capabilities, limitations, and effective prompt engineering techniques.",
+                subcategories: [
+                    {
+                        title: "LLM Architecture & Theory",
+                        topics: [
+                            "Transformer architecture fundamentals",
+                            "Attention mechanisms",
+                            "Model size, parameters, and context windows",
+                            "Pre-training vs fine-tuning concepts"
+                        ]
+                    },
+                    {
+                        title: "LLM Capabilities & Limitations",
+                        topics: [
+                            "What LLMs can and cannot do",
+                            "Hallucinations and reliability",
+                            "Reasoning capabilities",
+                            "Token limits and context management"
+                        ]
+                    },
+                    {
+                        title: "Prompt Engineering",
+                        topics: [
+                            "Prompt design principles",
+                            "Few-shot vs zero-shot learning",
+                            "Chain-of-thought reasoning",
+                            "Prompt optimization techniques"
+                        ]
+                    },
+                    {
+                        title: "LLM Model Landscape",
+                        topics: [
+                            "Major model providers (OpenAI, Anthropic, Google, etc.)",
+                            "Open-source vs proprietary models",
+                            "Model selection criteria",
+                            "Cost and performance trade-offs"
+                        ]
+                    }
+                ]
+            },
+            {
+                number: 3,
+                title: "Generative AI",
+                description: "Text generation, multimodal AI, fine-tuning techniques, and customization strategies for various generative AI applications.",
+                subcategories: [
+                    {
+                        title: "Text Generation",
+                        topics: [
+                            "Text generation techniques",
+                            "Controlled generation",
+                            "Text completion vs chat models",
+                            "Quality and consistency considerations"
+                        ]
+                    },
+                    {
+                        title: "Multimodal AI",
+                        topics: [
+                            "Vision-language models",
+                            "Image generation concepts",
+                            "Audio and speech processing",
+                            "Document understanding"
+                        ]
+                    },
+                    {
+                        title: "Fine-tuning & Customization",
+                        topics: [
+                            "Fine-tuning approaches",
+                            "Parameter-efficient methods (LoRA, QLoRA)",
+                            "Domain adaptation",
+                            "Evaluation of fine-tuned models"
+                        ]
+                    }
+                ]
+            },
+            {
+                number: 4,
+                title: "Retrieval-Augmented Generation (RAG)",
+                description: "RAG architecture, vector databases, embeddings, advanced techniques, and system design for knowledge-based AI applications.",
+                subcategories: [
+                    {
+                        title: "RAG Fundamentals",
+                        topics: [
+                            "RAG architecture and workflow",
+                            "Why RAG over fine-tuning",
+                            "Use cases and applications",
+                            "RAG vs other approaches"
+                        ]
+                    },
+                    {
+                        title: "Vector Databases & Embeddings",
+                        topics: [
+                            "Embedding models and types",
+                            "Vector similarity search",
+                            "Vector database options",
+                            "Indexing strategies"
+                        ]
+                    },
+                    {
+                        title: "Advanced RAG Techniques",
+                        topics: [
+                            "Chunking strategies",
+                            "Hybrid search approaches",
+                            "Re-ranking and filtering",
+                            "Context window optimization"
+                        ]
+                    },
+                    {
+                        title: "RAG System Design",
+                        topics: [
+                            "Document preprocessing pipelines",
+                            "Metadata and filtering",
+                            "Query optimization",
+                            "Performance monitoring"
+                        ]
+                    }
+                ]
+            },
+            {
+                number: 5,
+                title: "Agent Frameworks & Orchestration",
+                description: "LangChain, LangGraph, multi-agent frameworks, and design patterns for building intelligent agent systems.",
+                subcategories: [
+                    {
+                        title: "LangChain Ecosystem",
+                        topics: [
+                            "LangChain core concepts",
+                            "Chains, agents, and tools",
+                            "Memory management",
+                            "LangChain Expression Language (LCEL)"
+                        ]
+                    },
+                    {
+                        title: "LangGraph",
+                        topics: [
+                            "State machines for agents",
+                            "Graph-based workflows",
+                            "Branching and decision logic",
+                            "Human-in-the-loop patterns"
+                        ]
+                    },
+                    {
+                        title: "Multi-Agent Frameworks",
+                        topics: [
+                            "CrewAI concepts and architecture",
+                            "AutoGen framework",
+                            "Agent coordination patterns",
+                            "Multi-agent use cases"
+                        ]
+                    },
+                    {
+                        title: "Agent Design Patterns",
+                        topics: [
+                            "ReAct pattern",
+                            "Plan-and-execute pattern",
+                            "Reflection and self-correction",
+                            "Tool use and function calling"
+                        ]
+                    }
+                ]
+            },
+            {
+                number: 6,
+                title: "AI Application Development",
+                description: "Architecture patterns, GitHub Copilot best practices, tech stack selection, and integration strategies for AI applications.",
+                subcategories: [
+                    {
+                        title: "AI-Native Application Architecture",
+                        topics: [
+                            "Application design patterns",
+                            "Microservices for AI",
+                            "API design for LLM applications",
+                            "Scalability considerations"
+                        ]
+                    },
+                    {
+                        title: "GitHub Copilot & AI-Assisted Coding",
+                        topics: [
+                            "Effective use of coding assistants",
+                            "Best practices and anti-patterns",
+                            "Code review with AI assistance",
+                            "Limitations and when not to use AI coding tools"
+                        ]
+                    },
+                    {
+                        title: "Tech Stack for AI Applications",
+                        topics: [
+                            "Backend frameworks and choices",
+                            "Frontend integration patterns",
+                            "Real-time vs batch processing",
+                            "State management in AI apps"
+                        ]
+                    },
+                    {
+                        title: "Integration Patterns",
+                        topics: [
+                            "API integration strategies",
+                            "Streaming vs batch responses",
+                            "Error handling and retries",
+                            "Rate limiting and quotas"
+                        ]
+                    }
+                ]
+            },
+            {
+                number: 7,
+                title: "MLOps & Production Systems",
+                description: "MLOps lifecycle, model deployment, monitoring, observability, and production best practices for AI systems.",
+                subcategories: [
+                    {
+                        title: "MLOps Fundamentals",
+                        topics: [
+                            "MLOps lifecycle overview",
+                            "Model versioning and tracking",
+                            "Experiment management",
+                            "CI/CD for ML systems"
+                        ]
+                    },
+                    {
+                        title: "Model Deployment",
+                        topics: [
+                            "Deployment strategies",
+                            "Serving infrastructure",
+                            "Model optimization for production",
+                            "A/B testing and canary deployments"
+                        ]
+                    },
+                    {
+                        title: "Monitoring & Observability",
+                        topics: [
+                            "Performance monitoring",
+                            "Model drift detection",
+                            "Logging and debugging",
+                            "Cost tracking and optimization"
+                        ]
+                    },
+                    {
+                        title: "Production Best Practices",
+                        topics: [
+                            "Reliability and fault tolerance",
+                            "Security considerations",
+                            "Data privacy and compliance",
+                            "Disaster recovery"
+                        ]
+                    }
+                ]
+            },
+            {
+                number: 8,
+                title: "Data Engineering for AI",
+                description: "Data pipelines, storage solutions, dataset preparation, and data management for AI applications.",
+                subcategories: [
+                    {
+                        title: "Data Pipelines",
+                        topics: [
+                            "Data collection and ingestion",
+                            "ETL/ELT for AI systems",
+                            "Data quality and validation",
+                            "Pipeline orchestration"
+                        ]
+                    },
+                    {
+                        title: "Data Storage & Management",
+                        topics: [
+                            "Database choices for AI applications",
+                            "Data lake vs data warehouse",
+                            "Versioning and lineage",
+                            "Privacy and security"
+                        ]
+                    },
+                    {
+                        title: "Dataset Preparation",
+                        topics: [
+                            "Data annotation and labeling",
+                            "Synthetic data generation",
+                            "Data augmentation",
+                            "Train/validation/test splits"
+                        ]
+                    }
+                ]
+            },
+            {
+                number: 9,
+                title: "Software Engineering for AI",
+                description: "Design patterns, testing strategies, code quality standards, and architecture patterns specific to AI systems.",
+                subcategories: [
+                    {
+                        title: "Design Patterns for AI Systems",
+                        topics: [
+                            "Adapter pattern for LLM switching",
+                            "Strategy pattern for prompt management",
+                            "Observer pattern for monitoring",
+                            "Factory pattern for model selection"
+                        ]
+                    },
+                    {
+                        title: "Testing AI Applications",
+                        topics: [
+                            "Unit testing AI components",
+                            "Integration testing strategies",
+                            "Evaluation frameworks",
+                            "Test data management"
+                        ]
+                    },
+                    {
+                        title: "Code Quality & Standards",
+                        topics: [
+                            "Clean code principles for AI",
+                            "Documentation standards",
+                            "Code review practices",
+                            "Technical debt management"
+                        ]
+                    },
+                    {
+                        title: "Architecture Patterns",
+                        topics: [
+                            "Microservices architecture",
+                            "Event-driven architecture",
+                            "CQRS and event sourcing",
+                            "Domain-driven design for AI"
+                        ]
+                    }
+                ]
+            },
+            {
+                number: 10,
+                title: "Advanced Topics & Emerging Trends",
+                description: "RLHF, responsible AI, security considerations, and emerging trends like MCP and autonomous agents.",
+                subcategories: [
+                    {
+                        title: "Advanced AI Techniques",
+                        topics: [
+                            "Reinforcement learning from human feedback (RLHF)",
+                            "Constitutional AI",
+                            "Mixture of experts",
+                            "Quantization and optimization"
+                        ]
+                    },
+                    {
+                        title: "Responsible AI",
+                        topics: [
+                            "AI ethics and fairness",
+                            "Bias detection and mitigation",
+                            "Explainability and interpretability",
+                            "AI governance"
+                        ]
+                    },
+                    {
+                        title: "Security & Safety",
+                        topics: [
+                            "Prompt injection and jailbreaking",
+                            "Model security",
+                            "Data poisoning",
+                            "Red teaming AI systems"
+                        ]
+                    },
+                    {
+                        title: "Emerging Trends",
+                        topics: [
+                            "Model context protocol (MCP)",
+                            "Agent-to-agent communication",
+                            "Autonomous agents",
+                            "Future directions in AI"
+                        ]
+                    }
+                ]
+            },
+            {
+                number: 11,
+                title: "Domain-Specific Applications",
+                description: "Enterprise use cases, vertical-specific solutions, and internal tools powered by AI technologies.",
+                subcategories: [
+                    {
+                        title: "Enterprise Use Cases",
+                        topics: [
+                            "Customer support automation",
+                            "Document intelligence",
+                            "Code generation and review",
+                            "Business process automation"
+                        ]
+                    },
+                    {
+                        title: "Vertical-Specific Solutions",
+                        topics: [
+                            "Healthcare AI applications",
+                            "Financial services",
+                            "E-commerce and retail",
+                            "Legal and compliance"
+                        ]
+                    },
+                    {
+                        title: "Internal Tools & Productivity",
+                        topics: [
+                            "Knowledge management systems",
+                            "Developer tools and assistants",
+                            "Meeting summarization",
+                            "Search and discovery"
+                        ]
+                    }
+                ]
+            },
+            {
+                number: 12,
+                title: "Business & Strategy",
+                description: "AI product strategy, ROI measurement, client engagement, and business value demonstration.",
+                subcategories: [
+                    {
+                        title: "AI Product Strategy",
+                        topics: [
+                            "Build vs buy decisions",
+                            "MVP development for AI products",
+                            "User feedback and iteration",
+                            "Product-market fit for AI"
+                        ]
+                    },
+                    {
+                        title: "ROI & Metrics",
+                        topics: [
+                            "Measuring AI success",
+                            "Cost-benefit analysis",
+                            "Performance metrics",
+                            "Business value demonstration"
+                        ]
+                    },
+                    {
+                        title: "Client Engagement",
+                        topics: [
+                            "RFP response strategies",
+                            "Demo and POC development",
+                            "Technical proposal writing",
+                            "Stakeholder communication"
+                        ]
+                    }
+                ]
+            }
+        ];
+
+        // Software Engineering Excellence Data
+        const seCategories = [
+            {
+                number: 1,
+                title: "Software Architecture Fundamentals",
+                description: "Layered architecture, common patterns, microservices, and choosing the right architectural approach for your application.",
+                subcategories: [
+                    {
+                        title: "Layered Architecture Patterns",
+                        topics: [
+                            "N-tier vs N-layer architecture",
+                            "Separation of concerns principles",
+                            "Presentation, Business, Data access layers",
+                            "When and why to use layered architecture"
+                        ]
+                    },
+                    {
+                        title: "Common Architectural Patterns",
+                        topics: [
+                            "MVC, MVVM, MVP patterns",
+                            "Clean Architecture",
+                            "Hexagonal Architecture (Ports & Adapters)",
+                            "Onion Architecture"
+                        ]
+                    },
+                    {
+                        title: "Microservices Architecture",
+                        topics: [
+                            "Microservices principles and benefits",
+                            "Service boundaries and decomposition",
+                            "Inter-service communication patterns",
+                            "Microservices anti-patterns"
+                        ]
+                    },
+                    {
+                        title: "Monolithic vs Distributed Systems",
+                        topics: [
+                            "Monolith-first approach",
+                            "When to choose monolith vs microservices",
+                            "Modular monoliths",
+                            "Migration strategies"
+                        ]
+                    }
+                ]
+            },
+            {
+                number: 2,
+                title: "API Design & Development",
+                description: "RESTful and GraphQL API design, security best practices, and creating maintainable, well-documented APIs.",
+                subcategories: [
+                    {
+                        title: "RESTful API Design",
+                        topics: [
+                            "REST principles and constraints",
+                            "Resource modeling and URI design",
+                            "HTTP methods and status codes",
+                            "API versioning strategies"
+                        ]
+                    },
+                    {
+                        title: "GraphQL Fundamentals",
+                        topics: [
+                            "GraphQL vs REST comparison",
+                            "Schema design and resolvers",
+                            "Queries, mutations, and subscriptions",
+                            "Performance considerations"
+                        ]
+                    },
+                    {
+                        title: "API Security",
+                        topics: [
+                            "Authentication vs authorization",
+                            "OAuth 2.0 and OpenID Connect",
+                            "API key management",
+                            "Rate limiting and throttling"
+                        ]
+                    },
+                    {
+                        title: "API Best Practices",
+                        topics: [
+                            "Request/response design",
+                            "Error handling and status codes",
+                            "Documentation (OpenAPI/Swagger)",
+                            "Backward compatibility"
+                        ]
+                    }
+                ]
+            },
+            {
+                number: 3,
+                title: "Database Design & Management",
+                description: "Database modeling, transaction management, query optimization, and data migration strategies.",
+                subcategories: [
+                    {
+                        title: "Database Design Principles",
+                        topics: [
+                            "Normalization and denormalization",
+                            "Entity-relationship modeling",
+                            "Schema design best practices",
+                            "Database selection criteria (SQL vs NoSQL)"
+                        ]
+                    },
+                    {
+                        title: "Transaction Management",
+                        topics: [
+                            "ACID properties",
+                            "Transaction isolation levels",
+                            "Distributed transactions",
+                            "Optimistic vs pessimistic locking"
+                        ]
+                    },
+                    {
+                        title: "Query Optimization",
+                        topics: [
+                            "Index strategies and types",
+                            "Query execution plans",
+                            "N+1 query problem",
+                            "Database performance tuning"
+                        ]
+                    },
+                    {
+                        title: "Data Migration & Versioning",
+                        topics: [
+                            "Schema migration strategies",
+                            "Zero-downtime migrations",
+                            "Data versioning approaches",
+                            "Rollback strategies"
+                        ]
+                    }
+                ]
+            },
+            {
+                number: 4,
+                title: "Security Best Practices",
+                description: "Application security fundamentals, authentication, data protection, and secure coding practices.",
+                subcategories: [
+                    {
+                        title: "Application Security Fundamentals",
+                        topics: [
+                            "OWASP Top 10 vulnerabilities",
+                            "Input validation and sanitization",
+                            "SQL injection prevention",
+                            "Cross-site scripting (XSS) prevention"
+                        ]
+                    },
+                    {
+                        title: "Authentication & Authorization",
+                        topics: [
+                            "Password hashing and storage",
+                            "Session management",
+                            "Role-based access control (RBAC)",
+                            "Attribute-based access control (ABAC)"
+                        ]
+                    },
+                    {
+                        title: "Data Protection",
+                        topics: [
+                            "Encryption at rest and in transit",
+                            "PII and sensitive data handling",
+                            "Data masking and tokenization",
+                            "GDPR and compliance considerations"
+                        ]
+                    },
+                    {
+                        title: "Secure Coding Practices",
+                        topics: [
+                            "Principle of least privilege",
+                            "Defense in depth",
+                            "Security code review checklist",
+                            "Secrets management (API keys, credentials)"
+                        ]
+                    }
+                ]
+            },
+            {
+                number: 5,
+                title: "Code Quality & Standards",
+                description: "Clean code principles, SOLID design, coding conventions, and refactoring techniques.",
+                subcategories: [
+                    {
+                        title: "Clean Code Principles",
+                        topics: [
+                            "Naming conventions and readability",
+                            "Function and method design",
+                            "Code organization and structure",
+                            "DRY, KISS, YAGNI principles"
+                        ]
+                    },
+                    {
+                        title: "SOLID Principles",
+                        topics: [
+                            "Single Responsibility Principle",
+                            "Open/Closed Principle",
+                            "Liskov Substitution Principle",
+                            "Interface Segregation Principle",
+                            "Dependency Inversion Principle"
+                        ]
+                    },
+                    {
+                        title: "Code Conventions & Style",
+                        topics: [
+                            "Language-specific style guides",
+                            "Team coding standards",
+                            "Code formatting and consistency",
+                            "Documentation standards"
+                        ]
+                    },
+                    {
+                        title: "Refactoring Techniques",
+                        topics: [
+                            "When and how to refactor",
+                            "Code smells identification",
+                            "Refactoring patterns",
+                            "Technical debt management"
+                        ]
+                    }
+                ]
+            },
+            {
+                number: 6,
+                title: "Design Patterns",
+                description: "Creational, structural, and behavioral design patterns for building maintainable software systems.",
+                subcategories: [
+                    {
+                        title: "Creational Patterns",
+                        topics: [
+                            "Singleton, Factory, Abstract Factory",
+                            "Builder pattern",
+                            "Prototype pattern",
+                            "When to use each pattern"
+                        ]
+                    },
+                    {
+                        title: "Structural Patterns",
+                        topics: [
+                            "Adapter, Bridge, Composite",
+                            "Decorator pattern",
+                            "Facade pattern",
+                            "Proxy pattern"
+                        ]
+                    },
+                    {
+                        title: "Behavioral Patterns",
+                        topics: [
+                            "Strategy, Observer, Command",
+                            "Chain of Responsibility",
+                            "Template Method",
+                            "State and Mediator patterns"
+                        ]
+                    },
+                    {
+                        title: "Enterprise Integration Patterns",
+                        topics: [
+                            "Message queue patterns",
+                            "Event-driven patterns",
+                            "Service mesh concepts",
+                            "Circuit breaker pattern"
+                        ]
+                    }
+                ]
+            },
+            {
+                number: 7,
+                title: "Testing Strategies",
+                description: "Unit testing, integration testing, E2E testing, and avoiding common testing anti-patterns.",
+                subcategories: [
+                    {
+                        title: "Unit Testing",
+                        topics: [
+                            "Unit test principles and best practices",
+                            "Test-driven development (TDD)",
+                            "Mocking and stubbing",
+                            "Test coverage and metrics"
+                        ]
+                    },
+                    {
+                        title: "Integration Testing",
+                        topics: [
+                            "Integration test strategies",
+                            "Database testing approaches",
+                            "API testing",
+                            "Testing external dependencies"
+                        ]
+                    },
+                    {
+                        title: "End-to-End Testing",
+                        topics: [
+                            "E2E test frameworks",
+                            "UI testing strategies",
+                            "Test automation best practices",
+                            "Flaky test management"
+                        ]
+                    },
+                    {
+                        title: "Testing Anti-Patterns",
+                        topics: [
+                            "Common testing mistakes",
+                            "Test maintenance challenges",
+                            "Over-testing vs under-testing",
+                            "Test data management"
+                        ]
+                    }
+                ]
+            },
+            {
+                number: 8,
+                title: "Error Handling & Debugging",
+                description: "Exception handling, error response design, debugging techniques, and troubleshooting strategies.",
+                subcategories: [
+                    {
+                        title: "Exception Handling",
+                        topics: [
+                            "Exception handling best practices",
+                            "Custom exception design",
+                            "Global error handlers",
+                            "Exception propagation strategies"
+                        ]
+                    },
+                    {
+                        title: "Error Response Design",
+                        topics: [
+                            "User-friendly error messages",
+                            "Error codes and categorization",
+                            "Logging vs displaying errors",
+                            "Error recovery strategies"
+                        ]
+                    },
+                    {
+                        title: "Debugging Techniques",
+                        topics: [
+                            "Debugging tools and approaches",
+                            "Remote debugging",
+                            "Performance profiling",
+                            "Memory leak detection"
+                        ]
+                    },
+                    {
+                        title: "Troubleshooting Strategies",
+                        topics: [
+                            "Systematic debugging approach",
+                            "Log analysis techniques",
+                            "Root cause analysis",
+                            "Debugging in production"
+                        ]
+                    }
+                ]
+            },
+            {
+                number: 9,
+                title: "Logging & Monitoring",
+                description: "Logging best practices, distributed tracing, application monitoring, and observability.",
+                subcategories: [
+                    {
+                        title: "Logging Best Practices",
+                        topics: [
+                            "Log levels and when to use them",
+                            "Structured logging",
+                            "Logging frameworks and libraries",
+                            "What to log and what not to log"
+                        ]
+                    },
+                    {
+                        title: "Distributed Tracing",
+                        topics: [
+                            "Tracing in microservices",
+                            "Correlation IDs",
+                            "Distributed tracing tools",
+                            "Performance monitoring"
+                        ]
+                    },
+                    {
+                        title: "Application Monitoring",
+                        topics: [
+                            "Metrics and KPIs",
+                            "Health checks and heartbeats",
+                            "Alerting strategies",
+                            "Dashboard design"
+                        ]
+                    },
+                    {
+                        title: "Observability",
+                        topics: [
+                            "Three pillars: logs, metrics, traces",
+                            "Observability vs monitoring",
+                            "OpenTelemetry concepts",
+                            "Debugging production issues"
+                        ]
+                    }
+                ]
+            },
+            {
+                number: 10,
+                title: "Version Control & Collaboration",
+                description: "Git workflows, branching strategies, code review practices, and team collaboration tools.",
+                subcategories: [
+                    {
+                        title: "Git Fundamentals",
+                        topics: [
+                            "Git workflow basics",
+                            "Branching and merging",
+                            "Commit message conventions",
+                            "Git best practices"
+                        ]
+                    },
+                    {
+                        title: "Branching Strategies",
+                        topics: [
+                            "GitFlow workflow",
+                            "GitHub Flow",
+                            "Trunk-based development",
+                            "Feature branch strategies"
+                        ]
+                    },
+                    {
+                        title: "Code Review Practices",
+                        topics: [
+                            "Effective code review guidelines",
+                            "Review checklist and standards",
+                            "Giving and receiving feedback",
+                            "Pull request best practices"
+                        ]
+                    },
+                    {
+                        title: "Collaboration Tools",
+                        topics: [
+                            "Issue tracking and management",
+                            "Documentation practices",
+                            "Knowledge sharing approaches",
+                            "Team communication patterns"
+                        ]
+                    }
+                ]
+            },
+            {
+                number: 11,
+                title: "CI/CD & DevOps",
+                description: "Continuous integration, continuous deployment, infrastructure as code, and DevOps culture.",
+                subcategories: [
+                    {
+                        title: "Continuous Integration",
+                        topics: [
+                            "CI principles and benefits",
+                            "Build automation",
+                            "Automated testing in CI",
+                            "CI pipeline design"
+                        ]
+                    },
+                    {
+                        title: "Continuous Deployment",
+                        topics: [
+                            "CD vs Continuous Delivery",
+                            "Deployment strategies (blue-green, canary)",
+                            "Rollback procedures",
+                            "Zero-downtime deployments"
+                        ]
+                    },
+                    {
+                        title: "Infrastructure as Code",
+                        topics: [
+                            "IaC principles and benefits",
+                            "Configuration management",
+                            "Environment consistency",
+                            "IaC tools and approaches"
+                        ]
+                    },
+                    {
+                        title: "DevOps Culture",
+                        topics: [
+                            "DevOps principles",
+                            "Collaboration between dev and ops",
+                            "Automation mindset",
+                            "Continuous improvement"
+                        ]
+                    }
+                ]
+            },
+            {
+                number: 12,
+                title: "Performance Optimization",
+                description: "Application performance, caching strategies, scalability patterns, and front-end optimization.",
+                subcategories: [
+                    {
+                        title: "Application Performance",
+                        topics: [
+                            "Performance profiling tools",
+                            "Identifying bottlenecks",
+                            "Memory management",
+                            "CPU optimization techniques"
+                        ]
+                    },
+                    {
+                        title: "Caching Strategies",
+                        topics: [
+                            "Caching layers and types",
+                            "Cache invalidation strategies",
+                            "Distributed caching",
+                            "When not to cache"
+                        ]
+                    },
+                    {
+                        title: "Scalability Patterns",
+                        topics: [
+                            "Horizontal vs vertical scaling",
+                            "Load balancing strategies",
+                            "Database scaling approaches",
+                            "Stateless application design"
+                        ]
+                    },
+                    {
+                        title: "Front-end Performance",
+                        topics: [
+                            "Page load optimization",
+                            "Bundle size optimization",
+                            "Lazy loading strategies",
+                            "Image and asset optimization"
+                        ]
+                    }
+                ]
+            },
+            {
+                number: 13,
+                title: "Working with GitHub Copilot",
+                description: "Effective Copilot usage, code review with AI assistance, and avoiding anti-patterns with AI coding tools.",
+                subcategories: [
+                    {
+                        title: "Effective Copilot Usage",
+                        topics: [
+                            "Writing effective prompts for Copilot",
+                            "When to accept vs modify suggestions",
+                            "Context provision for better results",
+                            "Copilot limitations and fallbacks"
+                        ]
+                    },
+                    {
+                        title: "Code Review with AI Assistance",
+                        topics: [
+                            "Reviewing AI-generated code",
+                            "Security review of Copilot code",
+                            "Architecture validation",
+                            "Testing AI-generated code"
+                        ]
+                    },
+                    {
+                        title: "Anti-Patterns with AI Coding",
+                        topics: [
+                            "Over-reliance on AI suggestions",
+                            "Accepting code without understanding",
+                            "Architecture decisions to AI",
+                            "Bypassing code review for AI code"
+                        ]
+                    },
+                    {
+                        title: "Augmenting Development with AI",
+                        topics: [
+                            "Using AI for boilerplate code",
+                            "AI for refactoring suggestions",
+                            "Documentation generation",
+                            "Test case generation"
+                        ]
+                    }
+                ]
+            },
+            {
+                number: 14,
+                title: "Software Development Lifecycle",
+                description: "Agile methodologies, requirements engineering, estimation techniques, and project documentation.",
+                subcategories: [
+                    {
+                        title: "Agile Methodologies",
+                        topics: [
+                            "Scrum framework",
+                            "Kanban principles",
+                            "Sprint planning and execution",
+                            "Retrospectives and continuous improvement"
+                        ]
+                    },
+                    {
+                        title: "Requirements Engineering",
+                        topics: [
+                            "User story writing",
+                            "Acceptance criteria definition",
+                            "Requirements gathering techniques",
+                            "Managing changing requirements"
+                        ]
+                    },
+                    {
+                        title: "Estimation Techniques",
+                        topics: [
+                            "Story point estimation",
+                            "T-shirt sizing",
+                            "Planning poker",
+                            "Velocity tracking"
+                        ]
+                    },
+                    {
+                        title: "Project Documentation",
+                        topics: [
+                            "Technical documentation types",
+                            "README best practices",
+                            "API documentation",
+                            "Architecture decision records (ADRs)"
+                        ]
+                    }
+                ]
+            },
+            {
+                number: 15,
+                title: "Code Quality Tools & Automation",
+                description: "Linters, static analysis, code formatters, and dependency management.",
+                subcategories: [
+                    {
+                        title: "Linters & Static Analysis",
+                        topics: [
+                            "Linter configuration and usage",
+                            "ESLint, Pylint, SonarQube",
+                            "Static code analysis tools",
+                            "Custom linting rules"
+                        ]
+                    },
+                    {
+                        title: "Code Formatters",
+                        topics: [
+                            "Prettier, Black, autopep8",
+                            "Consistent code formatting",
+                            "Pre-commit hooks",
+                            "Automated formatting in CI"
+                        ]
+                    },
+                    {
+                        title: "Code Quality Metrics",
+                        topics: [
+                            "Cyclomatic complexity",
+                            "Code coverage metrics",
+                            "Technical debt measurement",
+                            "Quality gates"
+                        ]
+                    },
+                    {
+                        title: "Dependency Management",
+                        topics: [
+                            "Package versioning strategies",
+                            "Security vulnerability scanning",
+                            "Dependency update strategies",
+                            "Lock files and reproducible builds"
+                        ]
+                    }
+                ]
+            },
+            {
+                number: 16,
+                title: "Communication & Documentation",
+                description: "Technical writing, diagramming, knowledge management, and stakeholder communication.",
+                subcategories: [
+                    {
+                        title: "Technical Writing",
+                        topics: [
+                            "Writing clear documentation",
+                            "Code comments best practices",
+                            "API documentation standards",
+                            "Architecture documentation"
+                        ]
+                    },
+                    {
+                        title: "Diagramming & Visualization",
+                        topics: [
+                            "Architecture diagrams (C4 model)",
+                            "Sequence diagrams",
+                            "Entity relationship diagrams",
+                            "Flowcharts and process diagrams"
+                        ]
+                    },
+                    {
+                        title: "Knowledge Management",
+                        topics: [
+                            "Team wiki and documentation",
+                            "Onboarding documentation",
+                            "Decision documentation",
+                            "Lessons learned capture"
+                        ]
+                    },
+                    {
+                        title: "Stakeholder Communication",
+                        topics: [
+                            "Technical to non-technical translation",
+                            "Status reporting",
+                            "Demo preparation",
+                            "Managing expectations"
+                        ]
+                    }
+                ]
+            }
+        ];
+
+        // Function to render categories
+        function renderCategories(categories, gridId) {
+            const grid = document.getElementById(gridId);
+            grid.innerHTML = ''; // Clear existing content
+            
+            categories.forEach(category => {
+                const card = document.createElement('div');
+                card.className = 'category-card';
+                card.onclick = () => openModal(category);
+                
+                card.innerHTML = `
+                    <div class="category-number">${category.number}</div>
+                    <div class="category-title">${category.title}</div>
+                    <div class="category-description">${category.description}</div>
+                    <span class="subcategory-count">${category.subcategories.length} Sub-Categories</span>
+                `;
+                
+                grid.appendChild(card);
+            });
+        }
+
+        // Function to switch tabs
+        function switchTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            if (tabName === 'ai') {
+                document.getElementById('aiContent').classList.add('active');
+                document.getElementById('aiTab').classList.add('active');
+            } else if (tabName === 'se') {
+                document.getElementById('seContent').classList.add('active');
+                document.getElementById('seTab').classList.add('active');
+            }
+        }
+
+        // Function to open modal
+        function openModal(category) {
+            const modal = document.getElementById('categoryModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalCategoryNum = document.getElementById('modalCategoryNum');
+            const modalBody = document.getElementById('modalBody');
+            
+            modalCategoryNum.textContent = `Category ${category.number}`;
+            modalTitle.textContent = category.title;
+            
+            // Build subcategories HTML
+            let subcategoriesHTML = '';
+            category.subcategories.forEach(subcat => {
+                subcategoriesHTML += `
+                    <div class="subcategory-item">
+                        <div class="subcategory-title">${subcat.title}</div>
+                        <ul class="subcategory-topics">
+                            ${subcat.topics.map(topic => `<li>${topic}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            });
+            
+            modalBody.innerHTML = subcategoriesHTML;
+            modal.style.display = 'block';
+        }
+
+        // Close modal
+        const modal = document.getElementById('categoryModal');
+        const closeBtn = document.getElementsByClassName('close')[0];
+        
+        closeBtn.onclick = function() {
+            modal.style.display = 'none';
+        }
+        
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Initialize both grids
+        renderCategories(aiCategories, 'aiCategoryGrid');
+        renderCategories(seCategories, 'seCategoryGrid');
+    </script>
+</body>
+</html>

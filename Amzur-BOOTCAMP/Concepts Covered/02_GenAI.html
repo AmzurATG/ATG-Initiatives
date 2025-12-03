@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generative AI in Software Development</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.2em;
+        }
+
+        .section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        h2 {
+            color: #764ba2;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            border-left: 5px solid #667eea;
+            padding-left: 15px;
+        }
+
+        h3 {
+            color: #667eea;
+            margin-top: 20px;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .param-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .param-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+            transition: transform 0.3s ease;
+        }
+
+        .param-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .param-name {
+            font-weight: bold;
+            color: #764ba2;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .param-desc {
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .comparison-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+
+        .comparison-table td {
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .comparison-table tr:hover {
+            background: #f5f7fa;
+        }
+
+        .strong-fit {
+            color: #10b981;
+            font-weight: bold;
+        }
+
+        .weak-fit {
+            color: #ef4444;
+            font-weight: bold;
+        }
+
+        .use-cases-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .use-case {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 20px;
+            border-radius: 15px;
+            border-left: 5px solid #f97316;
+        }
+
+        .use-case-title {
+            font-weight: bold;
+            color: #c2410c;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .domain-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .domain-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            border-top: 5px solid #667eea;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .domain-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .domain-title {
+            color: #764ba2;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .domain-apps {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .domain-apps li {
+            padding: 8px 0;
+            border-bottom: 1px solid #e5e7eb;
+            color: #555;
+        }
+
+        .domain-apps li:last-child {
+            border-bottom: none;
+        }
+
+        .domain-apps li:before {
+            content: "→ ";
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .pros-cons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .pros, .cons {
+            padding: 20px;
+            border-radius: 15px;
+        }
+
+        .pros {
+            background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%);
+            border-left: 5px solid #10b981;
+        }
+
+        .cons {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border-left: 5px solid #ef4444;
+        }
+
+        .pros h4, .cons h4 {
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .pros ul, .cons ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .pros li, .cons li {
+            padding: 8px 0;
+            color: #333;
+        }
+
+        .pros li:before {
+            content: "✓ ";
+            color: #10b981;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .cons li:before {
+            content: "✗ ";
+            color: #ef4444;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .workflow-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .takeaways-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .pros-cons {
+                grid-template-columns: 1fr;
+            }
+            
+            .use-cases-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .workflow-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .takeaways-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+        }
+
+        .key-highlight {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border-left: 5px solid #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Generative AI in Software Development</h1>
+            <p class="subtitle">A Comprehensive Guide for Bootcamp Students</p>
+        </div>
+
+        <div class="section">
+            <h2>📊 Key Parameters of Generative AI Models</h2>
+            <div class="param-grid">
+                <div class="param-card">
+                    <div class="param-name">Temperature (0.0 - 2.0)</div>
+                    <div class="param-desc">Controls randomness and creativity. Lower values (0.1-0.3) produce deterministic, focused outputs ideal for code generation. Higher values (0.7-1.0) increase creativity for brainstorming and content generation.</div>
+                </div>
+                <div class="param-card">
+                    <div class="param-name">Max Tokens</div>
+                    <div class="param-desc">Defines the maximum length of the generated response. Critical for managing API costs and response time. For code: 500-2000 tokens, for documentation: 1000-4000 tokens.</div>
+                </div>
+                <div class="param-card">
+                    <div class="param-name">Top-P (Nucleus Sampling)</div>
+                    <div class="param-desc">Controls diversity by considering tokens with cumulative probability up to P. Values of 0.9-0.95 balance quality and variety, essential for generating alternative solutions.</div>
+                </div>
+                <div class="param-card">
+                    <div class="param-name">Frequency Penalty (-2.0 to 2.0)</div>
+                    <div class="param-desc">Reduces repetition in generated text. Positive values discourage repeated tokens, useful for generating diverse code patterns and avoiding redundant documentation.</div>
+                </div>
+                <div class="param-card">
+                    <div class="param-name">Presence Penalty (-2.0 to 2.0)</div>
+                    <div class="param-desc">Encourages the model to discuss new topics. Higher values push the model to explore different approaches and solutions in software design.</div>
+                </div>
+                <div class="param-card">
+                    <div class="param-name">Context Window</div>
+                    <div class="param-desc">The amount of text the model can process at once. Larger windows (32K-100K+ tokens) enable analyzing entire codebases and maintaining long conversation context.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🎯 Where Generative AI Excels in Software Development</h2>
+            
+            <div class="domain-grid">
+                <div class="domain-card">
+                    <div class="domain-title">Code Generation & Completion</div>
+                    <ul class="domain-apps">
+                        <li>Auto-completing functions and classes</li>
+                        <li>Generating boilerplate code</li>
+                        <li>Creating unit tests automatically</li>
+                        <li>Converting pseudocode to code</li>
+                    </ul>
+                </div>
+
+                <div class="domain-card">
+                    <div class="domain-title">Code Documentation</div>
+                    <ul class="domain-apps">
+                        <li>Generating API documentation</li>
+                        <li>Writing inline comments</li>
+                        <li>Creating README files</li>
+                        <li>Technical specification docs</li>
+                    </ul>
+                </div>
+
+                <div class="domain-card">
+                    <div class="domain-title">Code Review & Refactoring</div>
+                    <ul class="domain-apps">
+                        <li>Identifying code smells</li>
+                        <li>Suggesting optimizations</li>
+                        <li>Security vulnerability detection</li>
+                        <li>Code quality improvements</li>
+                    </ul>
+                </div>
+
+                <div class="domain-card">
+                    <div class="domain-title">DevOps & Infrastructure</div>
+                    <ul class="domain-apps">
+                        <li>Generating CI/CD pipelines</li>
+                        <li>Creating Docker configurations</li>
+                        <li>Infrastructure as Code (Terraform)</li>
+                        <li>Kubernetes manifests</li>
+                    </ul>
+                </div>
+
+                <div class="domain-card">
+                    <div class="domain-title">Database Operations</div>
+                    <ul class="domain-apps">
+                        <li>SQL query generation</li>
+                        <li>Schema design suggestions</li>
+                        <li>Query optimization</li>
+                        <li>Migration scripts</li>
+                    </ul>
+                </div>
+
+                <div class="domain-card">
+                    <div class="domain-title">API Development</div>
+                    <ul class="domain-apps">
+                        <li>REST API endpoint generation</li>
+                        <li>GraphQL schema creation</li>
+                        <li>API client code generation</li>
+                        <li>Webhook handlers</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>⚠️ Where Generative AI Has Limitations</h2>
+            
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Area</th>
+                        <th>Why It Struggles</th>
+                        <th>Alternative Approach</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="weak-fit">Complex Algorithm Design</span></td>
+                        <td>Cannot reason through novel algorithmic problems requiring deep mathematical insight</td>
+                        <td>Use AI for implementation after human designs the algorithm</td>
+                    </tr>
+                    <tr>
+                        <td><span class="weak-fit">System Architecture</span></td>
+                        <td>Lacks understanding of business context, scalability requirements, and long-term maintainability</td>
+                        <td>Use AI for component-level design, human for overall architecture</td>
+                    </tr>
+                    <tr>
+                        <td><span class="weak-fit">Security-Critical Code</span></td>
+                        <td>May introduce subtle vulnerabilities; cannot guarantee security properties</td>
+                        <td>AI-assisted with mandatory human security review</td>
+                    </tr>
+                    <tr>
+                        <td><span class="weak-fit">Real-time Performance Optimization</span></td>
+                        <td>Cannot measure actual runtime performance or understand hardware-specific optimizations</td>
+                        <td>Use profiling tools + AI for optimization suggestions</td>
+                    </tr>
+                    <tr>
+                        <td><span class="weak-fit">Domain-Specific Business Logic</span></td>
+                        <td>Lacks deep understanding of industry-specific rules and regulations</td>
+                        <td>Provide detailed context and examples in prompts</td>
+                    </tr>
+                    <tr>
+                        <td><span class="weak-fit">Legacy Code Modernization</span></td>
+                        <td>May miss critical business logic or introduce breaking changes</td>
+                        <td>Use AI for analysis and suggestions, human for final decisions</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>💡 Real-World Use Cases by Domain</h2>
+
+            <div class="use-cases-grid">
+                <div class="use-case">
+                    <div class="use-case-title">🏦 FinTech & Banking</div>
+                    <strong>Strong Applications:</strong>
+                    <ul>
+                        <li>Payment gateway integration code</li>
+                        <li>Financial report generation APIs</li>
+                        <li>Transaction validation logic</li>
+                        <li>Automated compliance documentation</li>
+                    </ul>
+                    <strong>Limitations:</strong> Complex fraud detection algorithms, regulatory compliance verification
+                </div>
+
+                <div class="use-case">
+                    <div class="use-case-title">🏥 Healthcare & MedTech</div>
+                    <strong>Strong Applications:</strong>
+                    <ul>
+                        <li>Patient data management systems</li>
+                        <li>Appointment scheduling APIs</li>
+                        <li>Medical record parsing and formatting</li>
+                        <li>Healthcare dashboard components</li>
+                    </ul>
+                    <strong>Limitations:</strong> Diagnostic algorithms, clinical decision support systems requiring medical validation
+                </div>
+
+                <div class="use-case">
+                    <div class="use-case-title">🛒 E-commerce & Retail</div>
+                    <strong>Strong Applications:</strong>
+                    <ul>
+                        <li>Shopping cart functionality</li>
+                        <li>Product recommendation engines (basic)</li>
+                        <li>Inventory management systems</li>
+                        <li>Order processing workflows</li>
+                        <li>Payment integration code</li>
+                    </ul>
+                    <strong>Limitations:</strong> Complex pricing strategies, sophisticated fraud prevention
+                </div>
+
+                <div class="use-case">
+                    <div class="use-case-title">📱 Mobile App Development</div>
+                    <strong>Strong Applications:</strong>
+                    <ul>
+                        <li>UI component generation (React Native, Flutter)</li>
+                        <li>State management boilerplate</li>
+                        <li>API integration code</li>
+                        <li>Form validation logic</li>
+                        <li>Navigation setup</li>
+                    </ul>
+                    <strong>Limitations:</strong> Platform-specific optimizations, complex animations, native module integration
+                </div>
+
+                <div class="use-case">
+                    <div class="use-case-title">🎮 Gaming Industry</div>
+                    <strong>Strong Applications:</strong>
+                    <ul>
+                        <li>Game logic prototyping</li>
+                        <li>Procedural content generation scripts</li>
+                        <li>UI/menu systems</li>
+                        <li>Basic AI opponent behavior</li>
+                    </ul>
+                    <strong>Limitations:</strong> Advanced graphics programming, real-time physics engines, complex multiplayer networking
+                </div>
+
+                <div class="use-case">
+                    <div class="use-case-title">🚗 IoT & Embedded Systems</div>
+                    <strong>Strong Applications:</strong>
+                    <ul>
+                        <li>Sensor data processing logic</li>
+                        <li>MQTT/communication protocols</li>
+                        <li>Device management APIs</li>
+                        <li>Data aggregation pipelines</li>
+                    </ul>
+                    <strong>Limitations:</strong> Real-time embedded systems, hardware-specific optimizations, safety-critical systems
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>✅ Best Practices & Limitations</h2>
+            <div class="pros-cons">
+                <div class="pros">
+                    <h4>Best Practices for Using Gen AI</h4>
+                    <ul>
+                        <li>Start with clear, specific prompts with context</li>
+                        <li>Iterate and refine generated code</li>
+                        <li>Always review security implications</li>
+                        <li>Use for repetitive tasks and boilerplate</li>
+                        <li>Combine AI suggestions with human expertise</li>
+                        <li>Version control AI-generated code</li>
+                        <li>Test thoroughly before production</li>
+                        <li>Use lower temperature for code generation</li>
+                    </ul>
+                </div>
+                <div class="cons">
+                    <h4>Common Pitfalls to Avoid</h4>
+                    <ul>
+                        <li>Blindly trusting generated code without review</li>
+                        <li>Using for security-critical systems without validation</li>
+                        <li>Assuming AI understands your business logic</li>
+                        <li>Skipping comprehensive testing</li>
+                        <li>Ignoring licensing and copyright concerns</li>
+                        <li>Over-reliance without learning fundamentals</li>
+                        <li>Not validating against current best practices</li>
+                        <li>Ignoring performance implications</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🚀 Getting Started Workflow</h2>
+            <div class="workflow-grid">
+                <div class="key-highlight">
+                    <h3>Recommended Approach for Developers:</h3>
+                    <ol style="padding-left: 20px; line-height: 2;">
+                        <li><strong>Define Requirements:</strong> Clearly specify what you need to build</li>
+                        <li><strong>Design First:</strong> Create architecture and design patterns yourself</li>
+                        <li><strong>Use AI for Implementation:</strong> Generate boilerplate, components, and utilities</li>
+                        <li><strong>Review & Refactor:</strong> Critically examine and improve generated code</li>
+                    </ol>
+                </div>
+                <div class="key-highlight">
+                    <h3 style="visibility: hidden;">Continuation</h3>
+                    <ol start="5" style="padding-left: 20px; line-height: 2;">
+                        <li><strong>Test Rigorously:</strong> Write and run comprehensive tests</li>
+                        <li><strong>Optimize:</strong> Profile and optimize performance bottlenecks</li>
+                        <li><strong>Document:</strong> Use AI to help create documentation</li>
+                        <li><strong>Iterate:</strong> Continuously improve based on feedback</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔑 Key Takeaways</h2>
+            <div class="takeaways-grid">
+                <div class="key-highlight">
+                    <ul style="line-height: 2; list-style: none; padding-left: 0;">
+                        <li>✨ Generative AI is a powerful assistant, not a replacement for developers</li>
+                        <li>🎯 Best for: Boilerplate code, documentation, testing, and repetitive tasks</li>
+                        <li>⚠️ Weakest at: Novel algorithms, business-critical logic, security-sensitive code</li>
+                    </ul>
+                </div>
+                <div class="key-highlight">
+                    <ul style="line-height: 2; list-style: none; padding-left: 0;">
+                        <li>🔧 Always combine AI capabilities with human expertise and judgment</li>
+                        <li>📈 Productivity gains are highest when AI handles routine tasks while developers focus on complex problems</li>
+                        <li>🛡️ Security, performance, and correctness require human validation</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

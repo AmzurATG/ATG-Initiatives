@@ -1,0 +1,2028 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSRF Prevention - Security in Web Scraping</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+
+        .intro-points {
+            list-style: none;
+            padding: 0;
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: left;
+        }
+
+        .intro-points li {
+            margin: 15px 0;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            border-radius: 8px;
+            border-left: 3px solid #4299e1;
+            font-size: 1.05em;
+            line-height: 1.5;
+        }
+
+        /* Navigation Menu */
+        nav {
+            background: #f8f9fa;
+            padding: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 3px solid #f093fb;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        nav span {
+            text-decoration: none;
+            color: #f093fb;
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: all 0.3s;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        nav span:hover {
+            background: #f093fb;
+            color: white;
+        }
+
+        /* Back to Menu button */
+        .back-to-menu {
+            display: inline-block;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 15px;
+            text-decoration: none;
+            font-size: 0.8em;
+            font-weight: 500;
+            margin-left: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            vertical-align: middle;
+        }
+
+        .back-to-menu:hover {
+            background: linear-gradient(135deg, #d081fb 0%, #f3456c 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(240, 147, 251, 0.3);
+        }
+
+        .back-to-menu::before {
+            content: "↑ ";
+            margin-right: 3px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .section-header h2 {
+            margin: 0;
+            flex: 1;
+            color: #f093fb;
+            font-size: 2em;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #f093fb;
+        }
+
+        /* Content sections */
+        section {
+            margin-bottom: 60px;
+            scroll-margin-top: 100px;
+        }
+
+        .danger-box {
+            background: linear-gradient(135deg, #fc8181 0%, #f56565 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin: 30px 0;
+            border: 3px solid #c53030;
+        }
+
+        .danger-box strong {
+            font-size: 1.3em;
+            display: block;
+            margin-bottom: 12px;
+        }
+
+        .danger-box p {
+            line-height: 1.7;
+            font-size: 1.05em;
+        }
+
+        .info-box {
+            background: #e6fffa;
+            border-left: 4px solid #319795;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 30px 0;
+        }
+
+        .info-box strong {
+            color: #234e52;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        .info-box p {
+            color: #285e61;
+            line-height: 1.6;
+        }
+
+        /* Enhanced Overview Section */
+        .overview-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 30px 0;
+        }
+
+        .threat-overview-card, .problem-overview-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .threat-overview-card {
+            border-color: #f56565;
+            background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+        }
+
+        .problem-overview-card {
+            border-color: #4299e1;
+            background: linear-gradient(135deg, #ebf8ff 0%, #bee3f8 100%);
+        }
+
+        .threat-overview-card:hover, .problem-overview-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+
+        .card-icon {
+            font-size: 3em;
+            text-align: center;
+            margin-bottom: 15px;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+        }
+
+        .card-content h3 {
+            color: #2d3748;
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .card-content p {
+            color: #4a5568;
+            line-height: 1.7;
+            margin-bottom: 20px;
+        }
+
+        .threat-examples, .attack-flow {
+            background: rgba(255,255,255,0.7);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #f56565;
+        }
+
+        .attack-flow {
+            border-left-color: #4299e1;
+        }
+
+        .threat-examples h4, .attack-flow h4 {
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+
+        .threat-examples ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .threat-examples li {
+            padding: 5px 0;
+            color: #742a2a;
+            font-size: 0.9em;
+        }
+
+        .threat-examples li::before {
+            content: "• ";
+            color: #f56565;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .flow-steps {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .flow-step-mini {
+            background: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 2px solid #4299e1;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85em;
+            min-width: 0;
+            flex: 1;
+        }
+
+        .step-number {
+            background: #4299e1;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .step-text {
+            color: #2d3748;
+            font-weight: 500;
+        }
+
+        .arrow-mini {
+            color: #4299e1;
+            font-weight: bold;
+            font-size: 1.2em;
+            flex-shrink: 0;
+        }
+
+        .quick-examples {
+            background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 30px;
+            color: white;
+        }
+
+        .quick-examples h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #fc8181;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .examples-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .example-item-mini {
+            background: rgba(248, 113, 113, 0.1);
+            border: 2px solid #fc8181;
+            padding: 12px 15px;
+            border-radius: 10px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .example-item-mini:hover {
+            background: rgba(248, 113, 113, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(248, 113, 113, 0.3);
+        }
+
+        .example-item-mini code {
+            display: block;
+            color: #fc8181;
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .example-desc {
+            color: #cbd5e0;
+            font-size: 0.8em;
+        }
+
+        /* Responsive design for overview */
+        @media (max-width: 768px) {
+            .overview-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .flow-steps {
+                flex-direction: column;
+            }
+            
+            .arrow-mini {
+                transform: rotate(90deg);
+            }
+            
+            .examples-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .flow-step-mini {
+                min-width: 200px;
+                justify-content: center;
+            }
+        }
+
+        .threat-details-section {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            margin: 40px 0;
+        }
+
+        .threat-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            overflow: hidden;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .threat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+
+        .threat-header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 20px 30px;
+            border-bottom: 3px solid #d63384;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .threat-header:hover {
+            background: linear-gradient(135deg, #e085f8 0%, #f34569 100%);
+            transform: translateY(-2px);
+        }
+
+        .threat-header h3 {
+            margin: 0;
+            font-size: 1.5em;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .toggle-icon {
+            font-size: 1.2em;
+            font-weight: bold;
+            transition: transform 0.3s ease;
+        }
+
+        .toggle-icon.rotated {
+            transform: rotate(180deg);
+        }
+
+        .threat-content {
+            padding: 30px;
+            max-height: 1000px;
+            overflow: hidden;
+            transition: all 0.5s ease;
+            opacity: 1;
+        }
+
+        .threat-content.collapsed {
+            max-height: 0;
+            padding: 0 30px;
+            opacity: 0;
+        }
+
+        .threat-impact {
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #f56565;
+        }
+
+        .threat-impact h4 {
+            color: #c53030;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .threat-impact ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .threat-impact li {
+            margin: 8px 0;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 6px;
+            color: #742a2a;
+            border-left: 3px solid #fc8181;
+        }
+
+        .threat-impact li strong {
+            color: #c53030;
+        }
+
+        .code-examples {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .attack-code {
+            background: linear-gradient(135deg, #fff1f1 0%, #ffe5e5 100%);
+            border-radius: 10px;
+            padding: 20px;
+            border: 2px solid #fca5a5;
+        }
+
+        .attack-code h4 {
+            color: #dc2626;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .prevention-code {
+            background: linear-gradient(135deg, #f0fff4 0%, #dcfce7 100%);
+            border-radius: 10px;
+            padding: 20px;
+            border: 2px solid #86efac;
+        }
+
+        .prevention-code h4 {
+            color: #16a34a;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .code-examples .code-block {
+            margin: 0;
+            background: #1e293b;
+            font-size: 0.85em;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        /* Responsive design for threat cards */
+        @media (max-width: 1024px) {
+            .code-examples {
+                grid-template-columns: 1fr;
+            }
+            
+            .threat-content {
+                padding: 20px;
+            }
+        }
+
+        .validator-section {
+            background: linear-gradient(135deg, #4299e1 0%, #667eea 100%);
+            padding: 40px;
+            border-radius: 15px;
+            margin: 40px 0;
+            box-shadow: 0 10px 30px rgba(66, 153, 225, 0.3);
+        }
+
+        .validator-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .validator-left {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 200px;
+        }
+
+        .validator-right {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 200px;
+        }
+
+        .validator-title {
+            color: white;
+            font-size: 2em;
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .url-input-group {
+            width: 100%;
+        }
+
+        .url-input {
+            width: 100%;
+            padding: 18px 20px;
+            font-size: 1.1em;
+            border: 3px solid white;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .url-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(255,255,255,0.5);
+            transform: scale(1.02);
+        }
+
+        .validate-btn {
+            width: 100%;
+            background: white;
+            color: #4299e1;
+            border: none;
+            padding: 18px;
+            font-size: 1.2em;
+            font-weight: 700;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .validate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .result-box {
+            padding: 25px;
+            border-radius: 12px;
+            font-size: 1.15em;
+            font-weight: 600;
+            text-align: center;
+            display: block;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            opacity: 0;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .result-box.show {
+            opacity: 1;
+            animation: slideIn 0.5s ease;
+        }
+
+        .result-box.safe {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            border: 3px solid #22543d;
+        }
+
+        .result-box.unsafe {
+            background: linear-gradient(135deg, #fc8181 0%, #f56565 100%);
+            color: white;
+            border: 3px solid #742a2a;
+        }
+
+        .result-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .result-message {
+            font-size: 1.3em;
+            margin-bottom: 10px;
+        }
+
+        .result-reason {
+            font-size: 0.95em;
+            opacity: 0.95;
+            line-height: 1.6;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .examples-section {
+            margin-top: 40px;
+        }
+
+        .examples-title {
+            font-size: 1.8em;
+            color: #2d3748;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .examples-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .example-box {
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .example-box.safe {
+            background: linear-gradient(135deg, #c6f6d5 0%, #9ae6b4 100%);
+            border: 3px solid #48bb78;
+        }
+
+        .example-box.unsafe {
+            background: linear-gradient(135deg, #fed7d7 0%, #fc8181 100%);
+            border: 3px solid #f56565;
+        }
+
+        .example-box h3 {
+            font-size: 1.4em;
+            margin-bottom: 15px;
+        }
+
+        .example-box.safe h3 {
+            color: #22543d;
+        }
+
+        .example-box.unsafe h3 {
+            color: #742a2a;
+        }
+
+        .example-item {
+            background: white;
+            padding: 12px 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .example-item:hover {
+            transform: translateX(10px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        /* Safe URLs - 4 columns layout (one row) */
+        .example-box.safe {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 15px;
+        }
+
+        .example-box.safe h3 {
+            grid-column: 1 / -1;
+            margin-bottom: 15px;
+        }
+
+        .example-box.safe .example-item {
+            margin: 5px 0;
+        }
+
+        /* Dangerous URLs - 6 columns layout (one row) */
+        .example-box.unsafe {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+            gap: 12px;
+        }
+
+        .example-box.unsafe h3 {
+            grid-column: 1 / -1;
+            margin-bottom: 15px;
+        }
+
+        .example-box.unsafe .example-item {
+            margin: 5px 0;
+        }
+
+        .flowchart-section {
+            background: #f7fafc;
+            padding: 40px;
+            border-radius: 15px;
+            margin: 40px 0;
+        }
+
+        .flowchart-title {
+            font-size: 1.8em;
+            color: #2d3748;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .flow-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            padding: 10px 0;
+        }
+
+        .flow-step {
+            background: white;
+            padding: 18px;
+            border-radius: 12px;
+            border-left: 5px solid #4299e1;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            flex: 1;
+            min-width: 180px;
+            max-width: 220px;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .flow-step:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            border-left-width: 8px;
+        }
+
+        .flow-arrow-right {
+            font-size: 2em;
+            color: #4299e1;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .flow-step-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .flow-step-number {
+            background: #4299e1;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 8px;
+            flex-shrink: 0;
+            font-size: 0.85em;
+        }
+
+        .flow-step-title {
+            font-weight: 700;
+            color: #2d3748;
+            font-size: 0.95em;
+            line-height: 1.2;
+        }
+
+        .flow-step-desc {
+            color: #718096;
+            line-height: 1.4;
+            font-size: 0.8em;
+        }
+
+        .ip-ranges-section {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+            padding: 35px;
+            border-radius: 15px;
+            margin: 40px 0;
+        }
+
+        .ip-ranges-title {
+            font-size: 1.8em;
+            color: #744210;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .ip-grid {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            padding: 10px 0;
+        }
+
+        .ip-card {
+            background: white;
+            padding: 16px 18px;
+            border-radius: 10px;
+            border: 2px solid #d97706;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            flex: 1;
+            min-width: 150px;
+            max-width: 170px;
+            transition: all 0.3s ease;
+        }
+
+        .ip-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+        }
+
+        .ip-card h4 {
+            color: #92400e;
+            font-size: 1.1em;
+            margin-bottom: 6px;
+        }
+
+        .ip-card p {
+            color: #78350f;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .ip-card small {
+            color: #92400e;
+            font-size: 0.8em;
+            line-height: 1.3;
+        }
+
+        .tools-section {
+            margin-top: 50px;
+            background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
+            padding: 35px;
+            border-radius: 15px;
+            color: white;
+        }
+
+        .tools-title {
+            font-size: 1.8em;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .tool-card {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .tool-card:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateY(-3px);
+        }
+
+        .tool-card h4 {
+            font-size: 1.3em;
+            margin-bottom: 10px;
+        }
+
+        .tool-card p {
+            font-size: 0.95em;
+            line-height: 1.6;
+            margin-bottom: 12px;
+            opacity: 0.95;
+        }
+
+        .tool-card .alternatives {
+            font-size: 0.85em;
+            background: rgba(0,0,0,0.2);
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+
+        /* Code examples */
+        .code-block {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+        }
+
+        .keyword { color: #c678dd; }
+        .function { color: #61afef; }
+        .string { color: #98c379; }
+        .comment { color: #5c6370; }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .threats-solutions-section,
+            .examples-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .flow-step {
+                min-width: 160px;
+                max-width: 180px;
+            }
+            
+            .ip-card {
+                min-width: 140px;
+                max-width: 160px;
+            }
+            
+            nav ul {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .back-to-menu {
+                margin-left: 0;
+                margin-top: 10px;
+            }
+            
+            .validator-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .validator-left,
+            .validator-right {
+                min-height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SSRF Prevention in Web Scraping</h1>
+        <div class="subtitle">
+            <ul class="intro-points">
+                <li><strong>Critical Security Foundation:</strong> SSRF prevention is absolutely essential for web scraping applications that process user-provided URLs, protecting your infrastructure from unauthorized access and data breaches</li>
+                <li><strong>Real Attack Scenarios:</strong> Without proper validation mechanisms, malicious attackers can exploit your scraper to access internal services, private network resources, sensitive databases, and confidential system information</li>
+                <li><strong>Master Defense Techniques:</strong> Learn comprehensive security methods to validate URLs, implement robust filtering, block malicious requests, and completely secure your application from sophisticated SSRF attacks</li>
+            </ul>
+        </div>
+
+        <nav id="navigation-menu">
+            <ul>
+                <li><span onclick="document.getElementById('overview').scrollIntoView({behavior: 'smooth'}); return false;">Overview</span></li>
+                <li><span onclick="document.getElementById('threats-solutions').scrollIntoView({behavior: 'smooth'}); return false;">Threats & Solutions</span></li>
+                <li><span onclick="document.getElementById('validator').scrollIntoView({behavior: 'smooth'}); return false;">URL Validator</span></li>
+                <li><span onclick="document.getElementById('examples').scrollIntoView({behavior: 'smooth'}); return false;">Examples</span></li>
+                <li><span onclick="document.getElementById('process').scrollIntoView({behavior: 'smooth'}); return false;">Validation Process</span></li>
+                <li><span onclick="document.getElementById('ip-ranges').scrollIntoView({behavior: 'smooth'}); return false;">IP Ranges</span></li>
+                <li><span onclick="document.getElementById('implementation').scrollIntoView({behavior: 'smooth'}); return false;">Code Examples</span></li>
+                <li><span onclick="document.getElementById('tools').scrollIntoView({behavior: 'smooth'}); return false;">Tools</span></li>
+            </ul>
+        </nav>
+
+        <section id="overview">
+            <div class="section-header">
+                <h2>Security Overview</h2>
+                <!-- <span class="back-to-menu" onclick="scrollToNavigation(); return false;">Back to Menu</span> -->
+            </div>
+
+            <div class="overview-grid">
+                <div class="threat-overview-card">
+                    <!-- <div class="card-icon">⚠️</div> -->
+                    <div class="card-content">
+                        <h3>Critical Security Threat</h3>
+                        <p>
+                            Web scraping applications that blindly follow user-provided URLs can be manipulated to access internal services, 
+                            localhost resources, or restricted networks, potentially leading to severe security breaches.
+                        </p>
+                        <div class="threat-examples">
+                            <h4>Potential Targets:</h4>
+                            <ul>
+                                <li>Database servers (PostgreSQL, MySQL, Redis)</li>
+                                <li>Internal APIs and admin panels</li>
+                                <li>Cloud metadata services (AWS, Azure, GCP)</li>
+                                <li>Monitoring and logging systems</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="problem-overview-card">
+                    <!-- <div class="card-icon">💡</div> -->
+                    <div class="card-content">
+                        <h3>How SSRF Attacks Work</h3>
+                        <p>
+                            SSRF attacks exploit the trust your server has in itself and internal networks. When your application 
+                            makes requests on behalf of users, attackers can manipulate these requests.
+                        </p>
+                        <div class="attack-flow">
+                            <h4>🔄 Attack Flow:</h4>
+                            <div class="flow-steps">
+                                <div class="flow-step-mini">
+                                    <span class="step-number">1</span>
+                                    <span class="step-text">Attacker submits malicious URL</span>
+                                </div>
+                                <div class="arrow-mini">→</div>
+                                <div class="flow-step-mini">
+                                    <span class="step-number">2</span>
+                                    <span class="step-text">Server makes internal request</span>
+                                </div>
+                                <div class="arrow-mini">→</div>
+                                <div class="flow-step-mini">
+                                    <span class="step-number">3</span>
+                                    <span class="step-text">Sensitive data exposed</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quick-examples">
+                <h3>Dangerous URL Examples</h3>
+                <div class="examples-row">
+                    <div class="example-item-mini dangerous">
+                        <code>http://localhost:5432</code>
+                        <span class="example-desc">PostgreSQL Database</span>
+                    </div>
+                    <div class="example-item-mini dangerous">
+                        <code>http://127.0.0.1:6379</code>
+                        <span class="example-desc">Redis Cache</span>
+                    </div>
+                    <div class="example-item-mini dangerous">
+                        <code>http://169.254.169.254/</code>
+                        <span class="example-desc">AWS Metadata</span>
+                    </div>
+                    <div class="example-item-mini dangerous">
+                        <code>http://192.168.1.1/admin</code>
+                        <span class="example-desc">Internal Admin Panel</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="threats-solutions">
+            <div class="section-header">
+                <h2>Threats & Solutions</h2>
+                <!-- <span class="back-to-menu" onclick="scrollToNavigation(); return false;">Back to Menu</span> -->
+            </div>
+
+            <div class="threat-details-section">
+                
+                <!-- Threat 1: Internal Service Access -->
+                <div class="threat-card">
+                    <div class="threat-header" onclick="toggleThreat('threat1')">
+                        <h3>Threat 1: Internal Service Access</h3>
+                        <span class="toggle-icon" id="icon-threat1">▼</span>
+                    </div>
+                    <div class="threat-content" id="threat1">
+                        <div class="threat-impact">
+                            <h4>What We Lose:</h4>
+                            <ul>
+                                <li><strong>Database Access:</strong> Unauthorized read/write to databases</li>
+                                <li><strong>Internal APIs:</strong> Access to admin endpoints, user data</li>
+                                <li><strong>Service Credentials:</strong> Redis sessions, internal tokens</li>
+                                <li><strong>System Control:</strong> Admin panels, monitoring dashboards</li>
+                            </ul>
+                        </div>
+                        <div class="code-examples">
+                            <div class="attack-code">
+                                <h4>Attack Code:</h4>
+                                <div class="code-block">
+<code><span class="comment"># Attacker sends malicious URL to scraper</span>
+malicious_payload = {
+    <span class="string">"url"</span>: <span class="string">"http://localhost:5432"</span>,  <span class="comment"># PostgreSQL</span>
+    <span class="string">"action"</span>: <span class="string">"scrape"</span>
+}
+
+<span class="comment"># Or target internal admin panel</span>
+admin_attack = {
+    <span class="string">"url"</span>: <span class="string">"http://127.0.0.1:8080/admin"</span>,
+    <span class="string">"action"</span>: <span class="string">"scrape"</span>
+}
+
+<span class="comment"># Server blindly makes request to internal service</span>
+response = requests.get(malicious_payload[<span class="string">"url"</span>])
+<span class="comment"># Attacker now has database/admin access!</span></code>
+                                </div>
+                            </div>
+                            <div class="prevention-code">
+                                <h4>Prevention Code:</h4>
+                                <div class="code-block">
+<code><span class="keyword">import</span> ipaddress
+<span class="keyword">from</span> urllib.parse <span class="keyword">import</span> urlparse
+
+<span class="keyword">def</span> <span class="function">prevent_internal_access</span>(url):
+    parsed = urlparse(url)
+    hostname = parsed.hostname
+    
+    <span class="comment"># Block localhost variations</span>
+    <span class="keyword">if</span> hostname <span class="keyword">in</span> [<span class="string">'localhost'</span>, <span class="string">'127.0.0.1'</span>, <span class="string">'0.0.0.0'</span>]:
+        <span class="keyword">raise</span> SecurityError(<span class="string">"Localhost access blocked"</span>)
+    
+    <span class="comment"># Check if IP is private</span>
+    <span class="keyword">try</span>:
+        ip = ipaddress.ip_address(hostname)
+        <span class="keyword">if</span> ip.is_private <span class="keyword">or</span> ip.is_loopback:
+            <span class="keyword">raise</span> SecurityError(<span class="string">f"Private IP blocked: {ip}"</span>)
+    <span class="keyword">except</span> ValueError:
+        <span class="keyword">pass</span>  <span class="comment"># It's a domain, not direct IP</span>
+    
+    <span class="comment"># Safe to proceed</span>
+    <span class="keyword">return</span> <span class="keyword">True</span></code>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Threat 2: Cloud Metadata Exposure -->
+                <div class="threat-card">
+                    <div class="threat-header" onclick="toggleThreat('threat2')">
+                        <h3>Threat 2: Cloud Metadata Exposure</h3>
+                        <span class="toggle-icon" id="icon-threat2">▼</span>
+                    </div>
+                    <div class="threat-content" id="threat2">
+                        <div class="threat-impact">
+                            <h4>What We Lose:</h4>
+                            <ul>
+                                <li><strong>AWS Credentials:</strong> Access keys, session tokens</li>
+                                <li><strong>Instance Metadata:</strong> Security groups, IAM roles</li>
+                                <li><strong>Network Info:</strong> VPC details, subnet configurations</li>
+                                <li><strong>Account Takeover:</strong> Full cloud environment access</li>
+                            </ul>
+                        </div>
+                        <div class="code-examples">
+                            <div class="attack-code">
+                                <h4>Attack Code:</h4>
+                                <div class="code-block">
+<code><span class="comment"># Target AWS metadata service</span>
+aws_metadata_urls = [
+    <span class="string">"http://169.254.169.254/latest/meta-data/"</span>,
+    <span class="string">"http://169.254.169.254/latest/meta-data/iam/security-credentials/"</span>,
+    <span class="string">"http://169.254.169.254/latest/user-data/"</span>
+]
+
+<span class="comment"># Attacker requests cloud metadata</span>
+<span class="keyword">for</span> url <span class="keyword">in</span> aws_metadata_urls:
+    payload = {<span class="string">"url"</span>: url}
+    response = requests.post(<span class="string">"/scrape"</span>, json=payload)
+    <span class="comment"># Now attacker has AWS credentials!</span>
+    credentials = response.json()
+    
+<span class="comment"># Similar attacks work on Azure, GCP</span>
+azure_metadata = <span class="string">"http://169.254.169.254/metadata/instance"</span></code>
+                                </div>
+                            </div>
+                            <div class="prevention-code">
+                                <h4>Prevention Code:</h4>
+                                <div class="code-block">
+<code><span class="keyword">def</span> <span class="function">block_metadata_access</span>(url):
+    parsed = urlparse(url)
+    hostname = parsed.hostname
+    
+    <span class="comment"># Block cloud metadata IPs</span>
+    metadata_ips = [
+        <span class="string">'169.254.169.254'</span>,  <span class="comment"># AWS/Azure/GCP</span>
+        <span class="string">'169.254.169.253'</span>,  <span class="comment"># AWS secondary</span>
+        <span class="string">'100.100.100.200'</span>   <span class="comment"># Alibaba Cloud</span>
+    ]
+    
+    <span class="keyword">if</span> hostname <span class="keyword">in</span> metadata_ips:
+        <span class="keyword">raise</span> SecurityError(
+            <span class="string">f"Cloud metadata access blocked: {hostname}"</span>
+        )
+    
+    <span class="comment"># Block link-local range entirely</span>
+    <span class="keyword">try</span>:
+        ip = ipaddress.ip_address(hostname)
+        <span class="keyword">if</span> ip.is_link_local:  <span class="comment"># 169.254.0.0/16</span>
+            <span class="keyword">raise</span> SecurityError(<span class="string">"Link-local IP blocked"</span>)
+    <span class="keyword">except</span> ValueError:
+        <span class="keyword">pass</span></code>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Threat 3: Port Scanning -->
+                <div class="threat-card">
+                    <div class="threat-header" onclick="toggleThreat('threat3')">
+                        <h3>Threat 3: Port Scanning & Service Discovery</h3>
+                        <span class="toggle-icon" id="icon-threat3">▼</span>
+                    </div>
+                    <div class="threat-content" id="threat3">
+                        <div class="threat-impact">
+                            <h4>What We Lose:</h4>
+                            <ul>
+                                <li><strong>Network Topology:</strong> Discovery of internal services</li>
+                                <li><strong>Service Enumeration:</strong> Open ports, running applications</li>
+                                <li><strong>Attack Surface:</strong> Mapping of vulnerable services</li>
+                                <li><strong>Intelligence Gathering:</strong> Network architecture exposure</li>
+                            </ul>
+                        </div>
+                        <div class="code-examples">
+                            <div class="attack-code">
+                                <h4>Attack Code:</h4>
+                                <div class="code-block">
+<code><span class="comment"># Automated port scanning via SSRF</span>
+internal_ips = [<span class="string">'192.168.1.{}'</span>.format(i) <span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(<span class="number">1</span>, <span class="number">255</span>)]
+common_ports = [<span class="number">22</span>, <span class="number">80</span>, <span class="number">443</span>, <span class="number">3306</span>, <span class="number">5432</span>, <span class="number">6379</span>, <span class="number">27017</span>]
+
+open_services = []
+<span class="keyword">for</span> ip <span class="keyword">in</span> internal_ips:
+    <span class="keyword">for</span> port <span class="keyword">in</span> common_ports:
+        scan_url = <span class="string">f"http://{ip}:{port}"</span>
+        payload = {<span class="string">"url"</span>: scan_url}
+        
+        <span class="keyword">try</span>:
+            response = requests.post(<span class="string">"/scrape"</span>, json=payload)
+            <span class="keyword">if</span> response.status_code != <span class="number">404</span>:
+                open_services.append(<span class="string">f"{ip}:{port}"</span>)
+                <span class="function">print</span>(<span class="string">f"Found service: {ip}:{port}"</span>)
+        <span class="keyword">except</span>:
+            <span class="keyword">pass</span>
+
+<span class="comment"># Attacker now has network map!</span></code>
+                                </div>
+                            </div>
+                            <div class="prevention-code">
+                                <h4>Prevention Code:</h4>
+                                <div class="code-block">
+<code><span class="keyword">import</span> time
+<span class="keyword">from</span> collections <span class="keyword">import</span> defaultdict
+
+<span class="comment"># Rate limiting and monitoring</span>
+request_tracker = defaultdict(list)
+
+<span class="keyword">def</span> <span class="function">prevent_port_scanning</span>(client_ip, url):
+    current_time = time.time()
+    
+    <span class="comment"># Clean old requests (last 60 seconds)</span>
+    request_tracker[client_ip] = [
+        req_time <span class="keyword">for</span> req_time <span class="keyword">in</span> request_tracker[client_ip]
+        <span class="keyword">if</span> current_time - req_time < <span class="number">60</span>
+    ]
+    
+    <span class="comment"># Check request frequency</span>
+    <span class="keyword">if</span> <span class="function">len</span>(request_tracker[client_ip]) > <span class="number">10</span>:
+        <span class="keyword">raise</span> SecurityError(
+            <span class="string">f"Rate limit exceeded for {client_ip}"</span>
+        )
+    
+    <span class="comment"># Block private IP ranges</span>
+    parsed = urlparse(url)
+    <span class="keyword">if</span> is_private_network(parsed.hostname):
+        <span class="keyword">raise</span> SecurityError(<span class="string">"Internal network scanning blocked"</span>)
+    
+    request_tracker[client_ip].append(current_time)</code>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Threat 4: Data Exfiltration -->
+                <div class="threat-card">
+                    <div class="threat-header" onclick="toggleThreat('threat4')">
+                        <h3>Threat 4: Data Exfiltration</h3>
+                        <span class="toggle-icon" id="icon-threat4">▼</span>
+                    </div>
+                    <div class="threat-content" id="threat4">
+                        <div class="threat-impact">
+                            <h4>What We Lose:</h4>
+                            <ul>
+                                <li><strong>Sensitive Files:</strong> Configuration files, logs, backups</li>
+                                <li><strong>Database Contents:</strong> User data, financial records</li>
+                                <li><strong>API Responses:</strong> Internal service data</li>
+                                <li><strong>Compliance Violation:</strong> GDPR, HIPAA, PCI-DSS breaches</li>
+                            </ul>
+                        </div>
+                        <div class="code-examples">
+                            <div class="attack-code">
+                                <h4>Attack Code:</h4>
+                                <div class="code-block">
+<code><span class="comment"># File protocol abuse</span>
+file_targets = [
+    <span class="string">"file:///etc/passwd"</span>,          <span class="comment"># System users</span>
+    <span class="string">"file:///etc/shadow"</span>,          <span class="comment"># Password hashes</span>
+    <span class="string">"file:///var/log/auth.log"</span>,    <span class="comment"># Authentication logs</span>
+    <span class="string">"file:///home/user/.ssh/id_rsa"</span> <span class="comment"># SSH keys</span>
+]
+
+<span class="comment"># Internal API exploitation</span>
+internal_apis = [
+    <span class="string">"http://localhost:8080/api/users"</span>,
+    <span class="string">"http://127.0.0.1:3000/admin/dump"</span>,
+    <span class="string">"http://192.168.1.100/backup.sql"</span>
+]
+
+<span class="keyword">for</span> target <span class="keyword">in</span> file_targets + internal_apis:
+    payload = {
+        <span class="string">"url"</span>: target,
+        <span class="string">"method"</span>: <span class="string">"GET"</span>
+    }
+    response = requests.post(<span class="string">"/scrape"</span>, json=payload)
+    <span class="comment"># Sensitive data leaked!</span></code>
+                                </div>
+                            </div>
+                            <div class="prevention-code">
+                                <h4>Prevention Code:</h4>
+                                <div class="code-block">
+<code><span class="keyword">def</span> <span class="function">prevent_data_exfiltration</span>(url):
+    parsed = urlparse(url)
+    
+    <span class="comment"># Block file protocol entirely</span>
+    <span class="keyword">if</span> parsed.scheme.lower() <span class="keyword">in</span> [<span class="string">'file'</span>, <span class="string">'ftp'</span>, <span class="string">'gopher'</span>]:
+        <span class="keyword">raise</span> SecurityError(
+            <span class="string">f"Protocol {parsed.scheme} not allowed"</span>
+        )
+    
+    <span class="comment"># Only allow HTTP/HTTPS</span>
+    <span class="keyword">if</span> parsed.scheme.lower() <span class="keyword">not</span> <span class="keyword">in</span> [<span class="string">'http'</span>, <span class="string">'https'</span>]:
+        <span class="keyword">raise</span> SecurityError(<span class="string">"Only HTTP/HTTPS allowed"</span>)
+    
+    <span class="comment"># Domain whitelist approach</span>
+    allowed_domains = [
+        <span class="string">'example.com'</span>,
+        <span class="string">'api.trusted-service.com'</span>,
+        <span class="string">'public-data.gov'</span>
+    ]
+    
+    <span class="keyword">if</span> parsed.hostname <span class="keyword">not</span> <span class="keyword">in</span> allowed_domains:
+        <span class="keyword">raise</span> SecurityError(
+            <span class="string">f"Domain {parsed.hostname} not whitelisted"</span>
+        )</code>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Threat 5: Network Pivoting -->
+                <div class="threat-card">
+                    <div class="threat-header" onclick="toggleThreat('threat5')">
+                        <h3>Threat 5: Network Pivoting</h3>
+                        <span class="toggle-icon" id="icon-threat5">▼</span>
+                    </div>
+                    <div class="threat-content" id="threat5">
+                        <div class="threat-impact">
+                            <h4>What We Lose:</h4>
+                            <ul>
+                                <li><strong>Network Segmentation:</strong> Bypass firewall rules</li>
+                                <li><strong>Lateral Movement:</strong> Attack other internal systems</li>
+                                <li><strong>Proxy Abuse:</strong> Your server becomes attack platform</li>
+                                <li><strong>Compliance:</strong> Your infrastructure used for attacks</li>
+                            </ul>
+                        </div>
+                        <div class="code-examples">
+                            <div class="attack-code">
+                                <h4>Attack Code:</h4>
+                                <div class="code-block">
+<code><span class="comment"># Using your server as HTTP proxy</span>
+<span class="keyword">def</span> <span class="function">pivot_attack</span>():
+    <span class="comment"># Step 1: Probe internal network</span>
+    internal_targets = [
+        <span class="string">"http://192.168.1.50/admin"</span>,
+        <span class="string">"http://172.16.0.100:22"</span>,
+        <span class="string">"http://10.0.0.200:3389"</span>  <span class="comment"># RDP</span>
+    ]
+    
+    <span class="comment"># Step 2: Chain attacks through your server</span>
+    <span class="keyword">for</span> target <span class="keyword">in</span> internal_targets:
+        <span class="comment"># Your server makes request to internal network</span>
+        response = requests.post(<span class="string">"/scrape"</span>, json={
+            <span class="string">"url"</span>: target,
+            <span class="string">"method"</span>: <span class="string">"POST"</span>,
+            <span class="string">"data"</span>: <span class="string">"malicious_payload"</span>
+        })
+        
+        <span class="comment"># Your server = unwitting attack proxy!</span>
+        <span class="keyword">if</span> <span class="string">"login"</span> <span class="keyword">in</span> response.text:
+            <span class="function">print</span>(<span class="string">f"Found admin panel: {target}"</span>)</code>
+                                </div>
+                            </div>
+                            <div class="prevention-code">
+                                <h4>Prevention Code:</h4>
+                                <div class="code-block">
+<code><span class="keyword">import</span> logging
+
+<span class="comment"># Comprehensive network blocking</span>
+<span class="keyword">def</span> <span class="function">prevent_network_pivoting</span>(url, client_ip):
+    parsed = urlparse(url)
+    
+    <span class="comment"># Log all requests for monitoring</span>
+    logging.warning(<span class="string">f"SSRF attempt from {client_ip}: {url}"</span>)
+    
+    <span class="comment"># Block all private networks</span>
+    private_ranges = [
+        <span class="string">'10.0.0.0/8'</span>,        <span class="comment"># Class A private</span>
+        <span class="string">'172.16.0.0/12'</span>,     <span class="comment"># Class B private</span>
+        <span class="string">'192.168.0.0/16'</span>,    <span class="comment"># Class C private</span>
+        <span class="string">'127.0.0.0/8'</span>,       <span class="comment"># Loopback</span>
+        <span class="string">'169.254.0.0/16'</span>     <span class="comment"># Link-local</span>
+    ]
+    
+    hostname = parsed.hostname
+    <span class="keyword">try</span>:
+        ip = ipaddress.ip_address(hostname)
+        <span class="keyword">for</span> network <span class="keyword">in</span> private_ranges:
+            <span class="keyword">if</span> ip <span class="keyword">in</span> ipaddress.ip_network(network):
+                <span class="comment"># Alert security team</span>
+                alert_security_team(client_ip, url, <span class="string">"Network pivoting attempt"</span>)
+                <span class="keyword">raise</span> SecurityError(<span class="string">"Internal network access blocked"</span>)
+    <span class="keyword">except</span> ValueError:
+        <span class="keyword">pass</span>  <span class="comment"># Domain name, check DNS resolution</span></code>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section id="validator">
+            <div class="section-header">
+                <h2>Interactive URL Validator</h2>
+                <!-- <span class="back-to-menu" onclick="scrollToNavigation(); return false;">Back to Menu</span> -->
+            </div>
+
+            <div class="validator-section">
+                <div class="validator-grid">
+                    <div class="validator-left">
+                        <div class="url-input-group">
+                            <input 
+                                type="text" 
+                                class="url-input" 
+                                id="urlInput" 
+                                placeholder="Enter a URL to test (e.g., http://example.com or http://localhost)"
+                            />
+                            <button class="validate-btn" id="validateBtn">🔒 Validate URL Security</button>
+                        </div>
+                    </div>
+                    <div class="validator-right">
+                        <div class="result-box" id="resultBox">
+                            <div class="result-icon" id="resultIcon"></div>
+                            <div class="result-message" id="resultMessage"></div>
+                            <div class="result-reason" id="resultReason"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="examples">
+            <div class="section-header">
+                <h2>Click Examples to Test</h2>
+                <!-- <span class="back-to-menu" onclick="scrollToNavigation(); return false;">Back to Menu</span> -->
+            </div>
+
+            <div class="examples-grid">
+                <div class="example-box safe">
+                    <h3>Safe URLs (Allowed)</h3>
+                    <div class="example-item" data-url="https://www.google.com">https://www.google.com</div>
+                    <div class="example-item" data-url="https://example.com">https://example.com</div>
+                    <div class="example-item" data-url="http://www.github.com">http://www.github.com</div>
+                    <div class="example-item" data-url="https://api.openai.com">https://api.openai.com</div>
+                </div>
+                
+                <div class="example-box unsafe">
+                    <h3>Dangerous URLs (Blocked)</h3>
+                    <div class="example-item" data-url="http://localhost">http://localhost</div>
+                    <div class="example-item" data-url="http://127.0.0.1">http://127.0.0.1</div>
+                    <div class="example-item" data-url="http://192.168.1.1">http://192.168.1.1</div>
+                    <div class="example-item" data-url="http://10.0.0.1">http://10.0.0.1</div>
+                    <div class="example-item" data-url="ftp://example.com">ftp://example.com</div>
+                    <div class="example-item" data-url="file:///etc/passwd">file:///etc/passwd</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="process">
+            <div class="section-header">
+                <h2>URL Validation Process</h2>
+                <!-- <span class="back-to-menu" onclick="scrollToNavigation(); return false;">Back to Menu</span> -->
+            </div>
+
+            <div class="flowchart-section">
+                <div class="flow-row">
+                    <div class="flow-step">
+                        <div class="flow-step-header">
+                            <span class="flow-step-number">1</span>
+                            <div class="flow-step-title">Check URL Scheme</div>
+                        </div>
+                        <div class="flow-step-desc">Verify protocol is http:// or https:// only</div>
+                    </div>
+                    
+                    <div class="flow-arrow-right">→</div>
+                    
+                    <div class="flow-step">
+                        <div class="flow-step-header">
+                            <span class="flow-step-number">2</span>
+                            <div class="flow-step-title">Parse Domain/IP</div>
+                        </div>
+                        <div class="flow-step-desc">Extract hostname or IP address for validation</div>
+                    </div>
+                    
+                    <div class="flow-arrow-right">→</div>
+                    
+                    <div class="flow-step">
+                        <div class="flow-step-header">
+                            <span class="flow-step-number">3</span>
+                            <div class="flow-step-title">Check Private IPs</div>
+                        </div>
+                        <div class="flow-step-desc">Block localhost, private networks, link-local</div>
+                    </div>
+                    
+                    <div class="flow-arrow-right">→</div>
+                    
+                    <div class="flow-step">
+                        <div class="flow-step-header">
+                            <span class="flow-step-number">4</span>
+                            <div class="flow-step-title">DNS Resolution</div>
+                        </div>
+                        <div class="flow-step-desc">Resolve domain to IP, verify not private</div>
+                    </div>
+                    
+                    <div class="flow-arrow-right">→</div>
+                    
+                    <div class="flow-step">
+                        <div class="flow-step-header">
+                            <span class="flow-step-number">5</span>
+                            <div class="flow-step-title">Allow or Reject</div>
+                        </div>
+                        <div class="flow-step-desc">Pass all checks = allow; else reject</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="ip-ranges">
+            <div class="section-header">
+                <h2>Blocked Private IP Ranges</h2>
+                <!-- <span class="back-to-menu" onclick="scrollToNavigation(); return false;">Back to Menu</span> -->
+            </div>
+
+            <div class="ip-ranges-section">
+                <div class="ip-grid">
+                    <div class="ip-card">
+                        <h4>Localhost</h4>
+                        <p>127.0.0.0/8</p>
+                        <small>Loopback addresses - your own machine</small>
+                    </div>
+                    <div class="ip-card">
+                        <h4>Private Class A</h4>
+                        <p>10.0.0.0/8</p>
+                        <small>Large private networks (16.7M IPs)</small>
+                    </div>
+                    <div class="ip-card">
+                        <h4>Private Class B</h4>
+                        <p>172.16.0.0/12</p>
+                        <small>Medium private networks (1M IPs)</small>
+                    </div>
+                    <div class="ip-card">
+                        <h4>Private Class C</h4>
+                        <p>192.168.0.0/16</p>
+                        <small>Small private networks (65K IPs)</small>
+                    </div>
+                    <div class="ip-card">
+                        <h4>Link-Local</h4>
+                        <p>169.254.0.0/16</p>
+                        <small>Auto-configured local networks</small>
+                    </div>
+                    <div class="ip-card">
+                        <h4>IPv6 Private</h4>
+                        <p>fc00::/7, ::1/128</p>
+                        <small>IPv6 private and localhost</small>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="implementation">
+            <div class="section-header">
+                <h2>Implementation Examples</h2>
+                <!-- <span class="back-to-menu" onclick="scrollToNavigation(); return false;">Back to Menu</span> -->
+            </div>
+
+            <div class="threat-card">
+                <div class="threat-header" onclick="toggleThreat('pythonFunction')">
+                    <h3>Python SSRF Prevention Function</h3>
+                    <span class="toggle-icon" id="icon-pythonFunction">▶</span>
+                </div>
+                <div class="threat-content" id="pythonFunction">
+                    <div class="code-block">
+<code><span class="keyword">import</span> ipaddress
+<span class="keyword">import</span> socket
+<span class="keyword">from</span> urllib.parse <span class="keyword">import</span> urlparse
+
+<span class="keyword">def</span> <span class="function">is_safe_url</span>(url):
+    <span class="string">"""
+    Validate URL to prevent SSRF attacks
+    Returns: (bool, str) - (is_safe, reason)
+    """</span>
+    
+    <span class="comment"># 1. Check protocol</span>
+    <span class="keyword">try</span>:
+        parsed = urlparse(url)
+        <span class="keyword">if</span> parsed.scheme.lower() <span class="keyword">not</span> <span class="keyword">in</span> [<span class="string">'http'</span>, <span class="string">'https'</span>]:
+            <span class="keyword">return</span> <span class="keyword">False</span>, <span class="string">f"Invalid protocol: {parsed.scheme}"</span>
+    <span class="keyword">except</span>:
+        <span class="keyword">return</span> <span class="keyword">False</span>, <span class="string">"Invalid URL format"</span>
+    
+    hostname = parsed.hostname
+    <span class="keyword">if</span> <span class="keyword">not</span> hostname:
+        <span class="keyword">return</span> <span class="keyword">False</span>, <span class="string">"No hostname found"</span>
+    
+    <span class="comment"># 2. Check if hostname is IP address</span>
+    <span class="keyword">try</span>:
+        ip = ipaddress.ip_address(hostname)
+        <span class="keyword">return</span> check_ip_safety(ip)
+    <span class="keyword">except</span> ValueError:
+        <span class="comment"># It's a domain name, resolve it</span>
+        <span class="keyword">return</span> check_domain_safety(hostname)
+
+<span class="keyword">def</span> <span class="function">check_ip_safety</span>(ip):
+    <span class="string">"""Check if IP address is safe"""</span>
+    <span class="keyword">if</span> ip.is_private:
+        <span class="keyword">return</span> <span class="keyword">False</span>, <span class="string">f"Private IP blocked: {ip}"</span>
+    <span class="keyword">if</span> ip.is_loopback:
+        <span class="keyword">return</span> <span class="keyword">False</span>, <span class="string">f"Loopback IP blocked: {ip}"</span>
+    <span class="keyword">if</span> ip.is_link_local:
+        <span class="keyword">return</span> <span class="keyword">False</span>, <span class="string">f"Link-local IP blocked: {ip}"</span>
+    <span class="keyword">return</span> <span class="keyword">True</span>, <span class="string">"IP address is safe"</span>
+
+<span class="keyword">def</span> <span class="function">check_domain_safety</span>(hostname):
+    <span class="string">"""Resolve domain and check resulting IPs"""</span>
+    <span class="keyword">try</span>:
+        addresses = socket.getaddrinfo(hostname, <span class="keyword">None</span>)
+        <span class="keyword">for</span> addr_info <span class="keyword">in</span> addresses:
+            ip = ipaddress.ip_address(addr_info[4][0])
+            is_safe, reason = check_ip_safety(ip)
+            <span class="keyword">if</span> <span class="keyword">not</span> is_safe:
+                <span class="keyword">return</span> <span class="keyword">False</span>, <span class="string">f"Domain resolves to unsafe IP: {reason}"</span>
+        <span class="keyword">return</span> <span class="keyword">True</span>, <span class="string">"Domain resolves to safe IPs"</span>
+    <span class="keyword">except</span> socket.gaierror:
+        <span class="keyword">return</span> <span class="keyword">False</span>, <span class="string">"Cannot resolve domain"</span></code>
+                    </div>
+                </div>
+            </div>
+
+            <div class="threat-card">
+                <div class="threat-header" onclick="toggleThreat('fastApiMiddleware')">
+                    <h3>FastAPI Middleware Example</h3>
+                    <span class="toggle-icon" id="icon-fastApiMiddleware">▶</span>
+                </div>
+                <div class="threat-content" id="fastApiMiddleware">
+                    <div class="code-block">
+<code><span class="keyword">from</span> fastapi <span class="keyword">import</span> FastAPI, HTTPException, Request
+<span class="keyword">from</span> fastapi.middleware.base <span class="keyword">import</span> BaseHTTPMiddleware
+
+<span class="keyword">class</span> <span class="function">SSRFProtectionMiddleware</span>(BaseHTTPMiddleware):
+    <span class="keyword">async</span> <span class="keyword">def</span> <span class="function">dispatch</span>(self, request: Request, call_next):
+        <span class="comment"># Check if request contains URL parameter</span>
+        <span class="keyword">if</span> <span class="string">"url"</span> <span class="keyword">in</span> request.query_params:
+            url = request.query_params[<span class="string">"url"</span>]
+            is_safe, reason = is_safe_url(url)
+            <span class="keyword">if</span> <span class="keyword">not</span> is_safe:
+                <span class="keyword">raise</span> HTTPException(
+                    status_code=400,
+                    detail=<span class="string">f"SSRF blocked: {reason}"</span>
+                )
+        
+        response = <span class="keyword">await</span> call_next(request)
+        <span class="keyword">return</span> response
+
+app = FastAPI()
+app.add_middleware(SSRFProtectionMiddleware)</code>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tools">
+            <div class="section-header">
+                <h2>Tools & Libraries for SSRF Prevention</h2>
+                <!-- <span class="back-to-menu" onclick="scrollToNavigation(); return false;">Back to Menu</span> -->
+            </div>
+
+            <div class="tools-section">
+                <div class="tools-grid">
+                    <div class="tool-card">
+                        <h4>🔍 URL Parsing</h4>
+                        <p><strong>Primary:</strong> urllib.parse (urlparse) - Python's built-in library for parsing URLs and extracting scheme, netloc, path components</p>
+                        <div class="alternatives">
+                            <strong>Alternatives:</strong><br>
+                            • furl - Feature-rich URL parser<br>
+                            • yarl - Yet another URL library<br>
+                            • purl - Immutable URL objects<br>
+                            • w3lib.url - Scrapy's URL utilities
+                        </div>
+                    </div>
+
+                    <div class="tool-card">
+                        <h4>🌐 IP Address Validation</h4>
+                        <p><strong>Primary:</strong> ipaddress module - Python built-in for IP address manipulation, validation, and network range checking</p>
+                        <div class="alternatives">
+                            <strong>Alternatives:</strong><br>
+                            • netaddr - Advanced IP manipulation<br>
+                            • IPy - IP address handling library<br>
+                            • pytricia - IP prefix lookup<br>
+                            • iptools - IP address utilities
+                        </div>
+                    </div>
+
+                    <div class="tool-card">
+                        <h4>🔐 Request Security</h4>
+                        <p><strong>Primary:</strong> Custom validators - Build wrapper functions around requests library to validate before making HTTP calls</p>
+                        <div class="alternatives">
+                            <strong>Alternatives:</strong><br>
+                            • requests-toolbelt - Enhanced requests<br>
+                            • httpx - Modern HTTP client<br>
+                            • aiohttp - Async HTTP client<br>
+                            • urllib3 - Low-level HTTP library
+                        </div>
+                    </div>
+
+                    <div class="tool-card">
+                        <h4>🛡️ Security Frameworks</h4>
+                        <p><strong>Primary:</strong> Custom middleware - Implement validation logic in FastAPI middleware or dependency injection</p>
+                        <div class="alternatives">
+                            <strong>Alternatives:</strong><br>
+                            • Pydantic validators - Input validation<br>
+                            • cerberus - Data validation<br>
+                            • marshmallow - Serialization & validation<br>
+                            • voluptuous - Data validation library
+                        </div>
+                    </div>
+
+                    <div class="tool-card">
+                        <h4>🔒 DNS Resolution</h4>
+                        <p><strong>Primary:</strong> socket.getaddrinfo() - Resolve domain names to IP addresses for secondary validation</p>
+                        <div class="alternatives">
+                            <strong>Alternatives:</strong><br>
+                            • dnspython - DNS toolkit<br>
+                            • aiodns - Async DNS resolver<br>
+                            • pycares - C-ares DNS library<br>
+                            • dnslib - DNS protocol library
+                        </div>
+                    </div>
+
+                    <div class="tool-card">
+                        <h4>📋 Whitelist/Blacklist</h4>
+                        <p><strong>Primary:</strong> Configuration files (JSON/YAML) - Store allowed domains and blocked patterns in external config</p>
+                        <div class="alternatives">
+                            <strong>Alternatives:</strong><br>
+                            • redis - In-memory data store<br>
+                            • SQLite - Embedded database<br>
+                            • Environment variables - Simple config<br>
+                            • python-decouple - Config management
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const urlInput = document.getElementById('urlInput');
+        const validateBtn = document.getElementById('validateBtn');
+        const resultBox = document.getElementById('resultBox');
+        const resultIcon = document.getElementById('resultIcon');
+        const resultMessage = document.getElementById('resultMessage');
+        const resultReason = document.getElementById('resultReason');
+        const exampleItems = document.querySelectorAll('.example-item');
+
+        const privatePatterns = [
+            /^https?:\/\/(localhost|127\.\d+\.\d+\.\d+)/i,
+            /^https?:\/\/10\.\d+\.\d+\.\d+/,
+            /^https?:\/\/192\.168\.\d+\.\d+/,
+            /^https?:\/\/172\.(1[6-9]|2[0-9]|3[0-1])\.\d+\.\d+/,
+            /^https?:\/\/169\.254\.\d+\.\d+/,
+            /^https?:\/\/\[?::1\]?/i,
+            /^https?:\/\/\[?fc00:/i
+        ];
+
+        function validateURL(url) {
+            if (!url || url.trim() === '') {
+                return { safe: false, reason: 'Please enter a URL to validate' };
+            }
+
+            if (!url.match(/^https?:\/\//i)) {
+                return { safe: false, reason: 'Invalid protocol! Only http:// and https:// are allowed. Protocols like ftp://, file://, gopher:// are blocked for security.' };
+            }
+
+            // Check against private IP patterns
+            for (let pattern of privatePatterns) {
+                if (pattern.test(url)) {
+                    return { safe: false, reason: 'This URL targets private/internal networks which are blocked to prevent SSRF attacks.' };
+                }
+            }
+
+            // Additional checks for malicious patterns
+            if (url.includes('@')) {
+                return { safe: false, reason: 'URLs containing @ symbols are blocked as they may bypass authentication or redirect to malicious hosts.' };
+            }
+
+            if (url.match(/https?:\/\/\d+\.\d+\.\d+\.\d+/)) {
+                const ipMatch = url.match(/https?:\/\/(\d+\.\d+\.\d+\.\d+)/);
+                if (ipMatch) {
+                    const ip = ipMatch[1];
+                    const parts = ip.split('.').map(Number);
+                    
+                    // Additional private range checks
+                    if (parts[0] === 0 || parts[0] === 255) {
+                        return { safe: false, reason: 'Reserved IP address ranges are blocked.' };
+                    }
+                }
+            }
+
+            return { safe: true, reason: 'URL appears safe and can be used for web scraping.' };
+        }
+
+        function displayResult(result) {
+            resultBox.classList.remove('show', 'safe', 'unsafe');
+            
+            setTimeout(() => {
+                if (result.safe) {
+                    resultBox.classList.add('safe');
+                    // resultIcon.textContent = '✅';
+                    resultMessage.textContent = 'Safe URL';
+                } else {
+                    resultBox.classList.add('unsafe');
+                    // resultIcon.textContent = '🚫';
+                    resultMessage.textContent = 'Dangerous URL - Blocked';
+                }
+                
+                resultReason.textContent = result.reason;
+                resultBox.classList.add('show');
+            }, 100);
+        }
+
+        validateBtn.addEventListener('click', () => {
+            const url = urlInput.value.trim();
+            const result = validateURL(url);
+            displayResult(result);
+        });
+
+        urlInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const url = urlInput.value.trim();
+                const result = validateURL(url);
+                displayResult(result);
+            }
+        });
+
+        // Handle example clicks
+        exampleItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const url = item.getAttribute('data-url');
+                urlInput.value = url;
+                const result = validateURL(url);
+                displayResult(result);
+            });
+        });
+
+        // Toggle threat sections
+        function toggleThreat(threatId) {
+            const threatContent = document.getElementById(threatId);
+            const toggleIcon = document.getElementById(`icon-${threatId}`);
+            
+            if (threatContent.classList.contains('collapsed')) {
+                // Expand
+                threatContent.classList.remove('collapsed');
+                toggleIcon.textContent = '▼';
+                toggleIcon.classList.remove('rotated');
+            } else {
+                // Collapse
+                threatContent.classList.add('collapsed');
+                toggleIcon.textContent = '▶';
+                toggleIcon.classList.add('rotated');
+            }
+        }
+
+        // Initialize all threats as collapsed by default
+        document.addEventListener('DOMContentLoaded', function() {
+            const threatContents = document.querySelectorAll('.threat-content');
+            const toggleIcons = document.querySelectorAll('.toggle-icon');
+            
+            threatContents.forEach(content => {
+                content.classList.add('collapsed');
+            });
+            
+            toggleIcons.forEach(icon => {
+                icon.textContent = '▶';
+                icon.classList.add('rotated');
+            });
+        });
+
+        // Enhanced scroll to navigation function
+        function scrollToNavigation() {
+            const navElement = document.getElementById('navigation-menu');
+            if (navElement) {
+                // Calculate offset to account for sticky nav
+                const navRect = navElement.getBoundingClientRect();
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                const targetPosition = scrollTop + navRect.top - 20; // 20px offset for better visibility
+                
+                window.scrollTo({
+                    top: targetPosition,
+                    behavior: 'smooth'
+                });
+            }
+        }
+    </script>
+</body>
+</html>

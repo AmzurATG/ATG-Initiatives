@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LangChain Framework Guide</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+            font-size: 1.2rem;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .section {
+            margin-bottom: 50px;
+        }
+        
+        .section h2 {
+            color: #2c3e50;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .diagram-container {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            border: 2px solid #e9ecef;
+        }
+        
+        .components-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .component {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-left: 4px solid #667eea;
+            transition: transform 0.3s ease;
+        }
+        
+        .component:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+            cursor: pointer;
+        }
+        
+        .component.active {
+            border-left: 4px solid #4CAF50;
+            background: linear-gradient(135deg, #f8f9fa, #e8f5e8);
+        }
+        
+        .component h3 {
+            color: #667eea;
+            margin-top: 0;
+            font-size: 1.3rem;
+        }
+        
+        .architecture-flow {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            margin: 30px 0;
+        }
+        
+        .flow-level {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .flow-box {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            text-align: center;
+            min-width: 150px;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .arrow {
+            font-size: 1.5rem;
+            color: #667eea;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+        
+        .example-container {
+            background: #f1f3f4;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+            border-left: 5px solid #4CAF50;
+        }
+        
+        .example-title {
+            color: #2e7d32;
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+        
+        .code-block {
+            background: #263238;
+            color: #e8f5e8;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            margin: 15px 0;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .code-block pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .code-block code {
+            font-family: inherit;
+            font-size: inherit;
+            color: inherit;
+            background: none;
+            padding: 0;
+            white-space: pre-wrap;
+        }
+        
+        .highlight {
+            background: linear-gradient(120deg, #a8edea 0%, #fed6e3 100%);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+        
+        .benefits-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .benefit-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #4CAF50;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-radius: 10px 10px 0 0;
+            margin-bottom: 0;
+        }
+        
+        .tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            border-radius: 10px 10px 0 0;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .tab.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        .tab-content {
+            background: white;
+            padding: 25px;
+            border-radius: 0 0 10px 10px;
+            border: 2px solid #f8f9fa;
+            border-top: none;
+        }
+        
+        .code-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            width: 900px;
+            max-width: 95%;
+            max-height: 90%;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .modal-header {
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 1001;
+            padding: 30px 30px 20px 30px;
+            border-radius: 15px 15px 0 0;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .modal-body {
+            padding: 20px 30px 30px 30px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 30px;
+            cursor: pointer;
+            color: #666;
+            font-weight: bold;
+            z-index: 1002;
+        }
+        
+        .close-modal:hover {
+            color: #333;
+        }
+        
+        .modal-title {
+            color: #667eea;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            margin-top: 0;
+        }
+        
+        .code-example {
+            margin-bottom: 30px;
+        }
+        
+        .example-subtitle {
+            color: #2c3e50;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 5px;
+        }
+        
+        .example-description {
+            color: #555;
+            font-style: italic;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .hidden {
+            display: none;
+        }
+
+        /* Responsive modal sizes */
+        @media (max-width: 1200px) {
+            .modal-content {
+                width: 700px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .modal-content {
+                width: 95%;
+                max-height: 95%;
+            }
+            
+            .modal-header {
+                padding: 20px 20px 15px 20px;
+            }
+            
+            .modal-body {
+                padding: 15px 20px 20px 20px;
+            }
+            
+            .modal-title {
+                font-size: 1.5rem;
+            }
+            
+            .example-subtitle {
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .modal-content {
+                width: 98%;
+                max-height: 98%;
+            }
+            
+            .modal-header {
+                padding: 15px 15px 10px 15px;
+            }
+            
+            .modal-body {
+                padding: 10px 15px 15px 15px;
+            }
+            
+            .close-modal {
+                top: 10px;
+                right: 15px;
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>LangChain Framework</h1>
+            <p>Complete Guide with Architecture & Practical Examples</p>
+        </div>
+        
+        <div class="content">
+            <!-- Core Components Section -->
+            <div class="section">
+                <h2>Core Components</h2>
+                <div class="components-grid">
+                    <div class="component" onclick="showComponentCode('chains')">
+                        <h3>Chains</h3>
+                        <p>Sequences of calls that link LLMs and utilities together. Think of them as workflows that process information step by step.</p>
+                        <p><strong>Example:</strong> Document → Summary → Q&A</p>
+                        <p style="color: #667eea; font-weight: 500; margin-top: 10px;">📋 Click to see code examples</p>
+                    </div>
+                    
+                    <div class="component" onclick="showComponentCode('prompts')">
+                        <h3>Prompts</h3>
+                        <p>Templates that format inputs to language models consistently. They ensure your LLM gets the right context and instructions.</p>
+                        <p><strong>Example:</strong> "Analyze this {document} and answer: {question}"</p>
+                        <p style="color: #667eea; font-weight: 500; margin-top: 10px;">📋 Click to see code examples</p>
+                    </div>
+                    
+                    <div class="component" onclick="showComponentCode('memory')">
+                        <h3>Memory</h3>
+                        <p>Components that maintain context across conversations, enabling coherent multi-turn dialogues.</p>
+                        <p><strong>Example:</strong> Remembering previous questions in a chat</p>
+                        <p style="color: #667eea; font-weight: 500; margin-top: 10px;">📋 Click to see code examples</p>
+                    </div>
+                    
+                    <div class="component" onclick="showComponentCode('agents')">
+                        <h3>Agents</h3>
+                        <p>Decision-making entities that use tools and determine actions based on user input, creating dynamic applications.</p>
+                        <p><strong>Example:</strong> AI that decides whether to search web or query database</p>
+                        <p style="color: #667eea; font-weight: 500; margin-top: 10px;">📋 Click to see code examples</p>
+                    </div>
+                    
+                    <div class="component" onclick="showComponentCode('vectorstores')">
+                        <h3>Vector Stores</h3>
+                        <p>Storage systems for embeddings that enable similarity search and retrieval-augmented generation (RAG).</p>
+                        <p><strong>Example:</strong> Finding relevant documents for context</p>
+                        <p style="color: #667eea; font-weight: 500; margin-top: 10px;">📋 Click to see code examples</p>
+                    </div>
+                    
+                    <div class="component" onclick="showComponentCode('retrievers')">
+                        <h3>Retrievers</h3>
+                        <p>Components that fetch relevant information from knowledge bases to enhance LLM responses.</p>
+                        <p><strong>Example:</strong> Getting top 5 similar documents</p>
+                        <p style="color: #667eea; font-weight: 500; margin-top: 10px;">📋 Click to see code examples</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Architecture Diagram -->
+            <div class="section">
+                <h2>LangChain Architecture Flow</h2>
+                <div class="diagram-container">
+                    <div class="architecture-flow">
+                        <div class="flow-level">
+                            <div class="flow-box">User Input</div>
+                        </div>
+                        <div class="arrow">↓</div>
+                        <div class="flow-level">
+                            <div class="flow-box">Prompt Template</div>
+                        </div>
+                        <div class="arrow">↓</div>
+                        <div class="flow-level">
+                            <div class="flow-box">Retriever</div>
+                            <div class="flow-box">Memory</div>
+                            <div class="flow-box">Agent</div>
+                        </div>
+                        <div class="arrow">↓</div>
+                        <div class="flow-level">
+                            <div class="flow-box">Vector Store</div>
+                            <div class="flow-box">Tools</div>
+                        </div>
+                        <div class="arrow">↓</div>
+                        <div class="flow-level">
+                            <div class="flow-box">Chain Processing</div>
+                        </div>
+                        <div class="arrow">↓</div>
+                        <div class="flow-level">
+                            <div class="flow-box">LLM (GPT, Claude, etc.)</div>
+                        </div>
+                        <div class="arrow">↓</div>
+                        <div class="flow-level">
+                            <div class="flow-box">Response</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Practical Examples -->
+            <div class="section">
+                <h2>Practical Examples for Bootcamp</h2>
+                
+                <div class="tabs">
+                    <div class="tab active" onclick="showTab('basic')">Basic Chain</div>
+                    <div class="tab" onclick="showTab('rag')">RAG System</div>
+                    <div class="tab" onclick="showTab('agent')">Agent Example</div>
+                </div>
+                
+                <div class="tab-content">
+                    <div id="basic" class="example-tab">
+                        <div class="example-container">
+                            <div class="example-title">Basic Chain Example - Document Summarizer</div>
+                            <p>A simple chain that takes a document, summarizes it, and then answers questions about it.</p>
+                            
+                            <div class="code-block"><pre><code>from langchain.chains import LLMChain
+from langchain.prompts import PromptTemplate
+from langchain.llms import OpenAI
+
+# Create a prompt template
+template = """
+Please summarize the following document:
+{document}
+
+Summary:"""
+
+prompt = PromptTemplate(
+    input_variables=["document"],
+    template=template
+)
+
+# Create the chain
+llm = OpenAI()
+summary_chain = LLMChain(llm=llm, prompt=prompt)
+
+# Use the chain
+document = "Your long document text here..."
+result = summary_chain.run(document=document)
+print(result)</code></pre></div>
+                            
+                            <div class="benefits-list">
+                                <div class="benefit-item">
+                                    <strong>Use Case:</strong> Content summarization, report generation
+                                </div>
+                                <div class="benefit-item">
+                                    <strong>Business Value:</strong> Automate document processing
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="rag" class="example-tab hidden">
+                        <div class="example-container">
+                            <div class="example-title">RAG System Example - Knowledge Base Q&A</div>
+                            <p>A retrieval-augmented generation system that answers questions using your own documents.</p>
+                            
+                            <div class="code-block"><pre><code>from langchain.embeddings import OpenAIEmbeddings
+from langchain.vectorstores import Chroma
+from langchain.text_splitter import CharacterTextSplitter
+from langchain.chains import RetrievalQA
+from langchain.document_loaders import TextLoader
+
+# Load and split documents
+loader = TextLoader('knowledge_base.txt')
+documents = loader.load()
+text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
+texts = text_splitter.split_documents(documents)
+
+# Create embeddings and vector store
+embeddings = OpenAIEmbeddings()
+vectorstore = Chroma.from_documents(texts, embeddings)
+
+# Create QA chain
+qa = RetrievalQA.from_chain_type(
+    llm=OpenAI(),
+    chain_type="stuff",
+    retriever=vectorstore.as_retriever()
+)
+
+# Ask questions
+question = "What is our company's return policy?"
+answer = qa.run(question)
+print(answer)</code></pre></div>
+                            
+                            <div class="benefits-list">
+                                <div class="benefit-item">
+                                    <strong>Use Case:</strong> Customer support, internal wikis
+                                </div>
+                                <div class="benefit-item">
+                                    <strong>Business Value:</strong> Instant access to company knowledge
+                                </div>
+                                <div class="benefit-item">
+                                    <strong>Key Feature:</strong> Uses your own data for accurate answers
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="agent" class="example-tab hidden">
+                        <div class="example-container">
+                            <div class="example-title">Agent Example - Research Assistant</div>
+                            <p>An intelligent agent that can search the web, perform calculations, and make decisions.</p>
+                            
+                            <div class="code-block">from langchain.agents import initialize_agent, Tool
+from langchain.agents import AgentType
+from langchain.llms import OpenAI
+from langchain.utilities import GoogleSearchAPIWrapper
+import math
+
+# Define tools
+search = GoogleSearchAPIWrapper()
+tools = [
+    Tool(
+        name="Search",
+        func=search.run,
+        description="Search the internet for current information"
+    ),
+    Tool(
+        name="Calculator",
+        func=lambda x: str(eval(x)),
+        description="Perform mathematical calculations"
+    )
+]
+
+# Create agent
+llm = OpenAI(temperature=0)
+agent = initialize_agent(
+    tools, 
+    llm, 
+    agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
+    verbose=True
+)
+
+# Use agent
+query = "What is the current stock price of Apple and calculate 10% of that value"
+result = agent.run(query)
+print(result)</div>
+                            
+                            <div class="benefits-list">
+                                <div class="benefit-item">
+                                    <strong>Use Case:</strong> Research automation, data analysis
+                                </div>
+                                <div class="benefit-item">
+                                    <strong>Business Value:</strong> Autonomous task execution
+                                </div>
+                                <div class="benefit-item">
+                                    <strong>Key Feature:</strong> Makes decisions about which tools to use
+                                </div>
+                                <div class="benefit-item">
+                                    <strong>Advanced:</strong> Can chain multiple tool calls together
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Key Benefits -->
+            <div class="section">
+                <h2>Key Benefits for Developers</h2>
+                <div class="benefits-list">
+                    <div class="benefit-item">
+                        <strong>Rapid Prototyping:</strong> Build LLM apps quickly with pre-built components
+                    </div>
+                    <div class="benefit-item">
+                        <strong>Model Flexibility:</strong> Switch between different LLM providers easily
+                    </div>
+                    <div class="benefit-item">
+                        <strong>Modular Design:</strong> Mix and match components for custom solutions
+                    </div>
+                    <div class="benefit-item">
+                        <strong>Rich Ecosystem:</strong> Extensive integrations with databases and tools
+                    </div>
+                    <div class="benefit-item">
+                        <strong>RAG Simplified:</strong> Easy implementation of knowledge-based systems
+                    </div>
+                    <div class="benefit-item">
+                        <strong>Agent Framework:</strong> Build intelligent, decision-making applications
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Best Practices -->
+            <div class="section">
+                <h2>Best Practices for Bootcamp Students</h2>
+                <div class="diagram-container">
+                    <div class="benefits-list">
+                        <div class="benefit-item">
+                            <strong>Start Small:</strong> Begin with simple chains before building complex agents
+                        </div>
+                        <div class="benefit-item">
+                            <strong>Test Iteratively:</strong> Use LangChain's verbose mode to debug chains
+                        </div>
+                        <div class="benefit-item">
+                            <strong>Manage Costs:</strong> Monitor token usage, especially in production
+                        </div>
+                        <div class="benefit-item">
+                            <strong>Version Control:</strong> Track prompt templates and chain configurations
+                        </div>
+                        <div class="benefit-item">
+                            <strong>Error Handling:</strong> Implement robust error handling for LLM calls
+                        </div>
+                        <div class="benefit-item">
+                            <strong>Performance:</strong> Consider caching for repeated operations
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Code Modal -->
+    <div id="codeModal" class="code-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close-modal" onclick="closeModal()">&times;</span>
+                <div id="modalTitle"></div>
+            </div>
+            <div class="modal-body">
+                <div id="modalContent"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function showTab(tabName) {
+            // Hide all tab contents
+            const tabs = document.querySelectorAll('.example-tab');
+            tabs.forEach(tab => tab.classList.add('hidden'));
+            
+            // Remove active class from all tabs
+            const tabButtons = document.querySelectorAll('.tab');
+            tabButtons.forEach(button => button.classList.remove('active'));
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.remove('hidden');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+        
+        function showComponentCode(componentType) {
+            const codeExamples = {
+                chains: {
+                    title: 'Chains - Code Examples',
+                    examples: [
+                        {
+                            subtitle: '1. Simple LLM Chain',
+                            code: `from langchain.chains import LLMChain
+from langchain.prompts import PromptTemplate
+from langchain.llms import OpenAI
+
+# Create a simple chain
+template = "Tell me a joke about {topic}"
+prompt = PromptTemplate(input_variables=["topic"], template=template)
+llm = OpenAI()
+chain = LLMChain(llm=llm, prompt=prompt)
+
+# Run the chain
+result = chain.run(topic="programming")
+print(result)`
+                        },
+                        {
+                            subtitle: '2. Sequential Chain',
+                            code: `from langchain.chains import SequentialChain
+from langchain.chains import LLMChain
+
+# Create multiple chains
+# Chain 1: Generate a story
+story_template = "Write a short story about {topic}"
+story_prompt = PromptTemplate(input_variables=["topic"], template=story_template)
+story_chain = LLMChain(llm=llm, prompt=story_prompt, output_key="story")
+
+# Chain 2: Summarize the story
+summary_template = "Summarize this story: {story}"
+summary_prompt = PromptTemplate(input_variables=["story"], template=summary_template)
+summary_chain = LLMChain(llm=llm, prompt=summary_prompt, output_key="summary")
+
+# Combine chains
+overall_chain = SequentialChain(
+    chains=[story_chain, summary_chain],
+    input_variables=["topic"],
+    output_variables=["story", "summary"]
+)
+
+result = overall_chain({"topic": "a robot learning to cook"})`
+                        },
+                        {
+                            subtitle: '3. Transform Chain',
+                            code: `from langchain.chains import TransformChain
+
+def transform_func(inputs: dict) -> dict:
+    text = inputs["text"]
+    # Transform text to uppercase
+    return {"output_text": text.upper()}
+
+transform_chain = TransformChain(
+    input_variables=["text"],
+    output_variables=["output_text"],
+    transform=transform_func
+)
+
+result = transform_chain.run(text="hello world")`
+                        }
+                    ]
+                },
+                prompts: {
+                    title: 'Prompts - Code Examples',
+                    examples: [
+                        {
+                            subtitle: '1. Zero-Shot Prompt Template',
+                            description: 'No examples provided - relies on model\'s pre-training knowledge. Best for simple, well-understood tasks.',
+                            code: `from langchain.prompts import PromptTemplate
+
+# Zero-shot: No examples provided, relies on model's training
+template = """
+You are an expert translator. Translate the following text from {source_lang} to {target_lang}.
+
+Text: {text}
+Translation:"""
+
+zero_shot_prompt = PromptTemplate(
+    input_variables=["source_lang", "target_lang", "text"],
+    template=template
+)
+
+# Format the prompt
+formatted_prompt = zero_shot_prompt.format(
+    source_lang="English",
+    target_lang="Spanish", 
+    text="Hello, how are you today?"
+)
+print(formatted_prompt)`
+                        },
+                        {
+                            subtitle: '2. One-Shot (Single-Shot) Prompt Template',
+                            description: 'Provides exactly one example to guide the model. Perfect for showing desired format and style.',
+                            code: `from langchain.prompts import PromptTemplate
+
+# One-shot: Provides one example to guide the model
+template = """
+You are a sentiment analyzer. Classify the sentiment as positive, negative, or neutral.
+
+Example:
+Text: "I love this product, it works perfectly!"
+Sentiment: positive
+
+Now classify this text:
+Text: {text}
+Sentiment:"""
+
+one_shot_prompt = PromptTemplate(
+    input_variables=["text"],
+    template=template
+)
+
+# Use the template
+result = one_shot_prompt.format(text="The service was terrible and slow.")
+print(result)`
+                        },
+                        {
+                            subtitle: '3. Few-Shot Prompt Template',
+                            description: 'Multiple examples for better pattern recognition. Ideal for complex tasks requiring consistent formatting.',
+                            code: `from langchain.prompts import FewShotPromptTemplate, PromptTemplate
+
+# Few-shot: Multiple examples for better pattern recognition
+examples = [
+    {"input": "happy", "output": "😊"},
+    {"input": "sad", "output": "😢"},
+    {"input": "angry", "output": "😠"},
+    {"input": "excited", "output": "🤩"},
+    {"input": "confused", "output": "😕"}
+]
+
+# Create example template
+example_template = """
+Input: {input}
+Output: {output}"""
+
+example_prompt = PromptTemplate(
+    input_variables=["input", "output"],
+    template=example_template
+)
+
+# Create few-shot template
+few_shot_prompt = FewShotPromptTemplate(
+    examples=examples,
+    example_prompt=example_prompt,
+    prefix="Convert emotions to emojis:",
+    suffix="Input: {emotion}\\nOutput:",
+    input_variables=["emotion"]
+)
+
+result = few_shot_prompt.format(emotion="surprised")`
+                        },
+                        {
+                            subtitle: '4. Chain-of-Thought (CoT) Prompt Template',
+                            description: 'Encourages step-by-step reasoning and explicit thinking process. Excellent for math, logic, and analysis tasks.',
+                            code: `from langchain.prompts import PromptTemplate
+
+# Chain-of-Thought: Encourages step-by-step reasoning
+template = """
+You are a math tutor. Solve the following problem step by step, showing your reasoning.
+
+Problem: {math_problem}
+
+Let me think through this step by step:
+1. First, I need to identify what type of problem this is
+2. Then, I'll break it down into smaller steps
+3. Finally, I'll solve each step and provide the answer
+
+Step-by-step solution:"""
+
+cot_prompt = PromptTemplate(
+    input_variables=["math_problem"],
+    template=template
+)
+
+result = cot_prompt.format(
+    math_problem="If a train travels 120 miles in 2 hours, and then 180 miles in 3 hours, what is its average speed for the entire journey?"
+)`
+                        },
+                        {
+                            subtitle: '5. Role-Based Prompt Template',
+                            description: 'Assigns specific persona and expertise to the AI. Great for domain-specific responses and consistent character.',
+                            code: `from langchain.prompts import PromptTemplate
+
+# Role-based: Assigns specific role/persona to the AI
+template = """
+You are {role}, a highly experienced professional in your field.
+
+Your expertise includes: {expertise}
+Your communication style: {style}
+Your goal: {goal}
+
+User Question: {question}
+
+Please respond in character, using your professional expertise:"""
+
+role_prompt = PromptTemplate(
+    input_variables=["role", "expertise", "style", "goal", "question"],
+    template=template
+)
+
+result = role_prompt.format(
+    role="Dr. Sarah Chen, Senior Data Scientist",
+    expertise="machine learning, statistical analysis, Python programming",
+    style="clear, educational, with practical examples",
+    goal="help others understand complex data science concepts",
+    question="What's the difference between supervised and unsupervised learning?"
+)`
+                        },
+                        {
+                            subtitle: '6. Conditional Prompt Template',
+                            description: 'Adapts behavior based on input conditions like user skill level. Perfect for personalized experiences.',
+                            code: `from langchain.prompts import PromptTemplate
+
+# Conditional: Changes behavior based on input conditions
+def create_conditional_prompt(user_level):
+    if user_level == "beginner":
+        template = """
+        You are a friendly tutor explaining concepts to a beginner.
+        Use simple language, analogies, and step-by-step explanations.
+        
+        Topic: {topic}
+        
+        Beginner-friendly explanation:"""
+    elif user_level == "advanced":
+        template = """
+        You are an expert providing technical details to an advanced user.
+        Use precise terminology, assume prior knowledge, and focus on nuances.
+        
+        Topic: {topic}
+        
+        Advanced technical explanation:"""
+    else:  # intermediate
+        template = """
+        You are explaining to someone with moderate knowledge.
+        Balance technical accuracy with clarity.
+        
+        Topic: {topic}
+        
+        Intermediate explanation:"""
+    
+    return PromptTemplate(
+        input_variables=["topic"],
+        template=template
+    )
+
+# Usage
+beginner_prompt = create_conditional_prompt("beginner")
+result = beginner_prompt.format(topic="machine learning algorithms")`
+                        },
+                        {
+                            subtitle: '7. Chat Prompt Template with System Message',
+                            description: 'Multi-message conversations with system instructions. Ideal for chatbots and conversational AI applications.',
+                            code: `from langchain.prompts import ChatPromptTemplate
+from langchain.prompts import SystemMessagePromptTemplate, HumanMessagePromptTemplate
+
+# Multi-message chat template
+system_template = """You are {character}, {character_description}.
+
+Your personality traits:
+- {trait1}
+- {trait2}
+- {trait3}
+
+Respond to users in character, maintaining consistency with your personality."""
+
+system_message_prompt = SystemMessagePromptTemplate.from_template(system_template)
+
+human_template = "{user_message}"
+human_message_prompt = HumanMessagePromptTemplate.from_template(human_template)
+
+# Combine messages
+chat_prompt = ChatPromptTemplate.from_messages([
+    system_message_prompt,
+    human_message_prompt
+])
+
+# Format the prompt
+formatted_prompt = chat_prompt.format_prompt(
+    character="Sherlock Holmes",
+    character_description="the famous detective from Victorian London",
+    trait1="Highly observant and analytical",
+    trait2="Uses deductive reasoning",
+    trait3="Sometimes condescending but well-meaning",
+    user_message="I've lost my keys somewhere in my house. Can you help me find them?"
+).to_messages()`
+                        },
+                        {
+                            subtitle: '8. Template with Input Validation',
+                            description: 'Includes data validation and error handling. Essential for production systems requiring reliable input processing.',
+                            code: `from langchain.prompts import PromptTemplate
+from langchain.prompts.base import StringPromptValue
+
+class ValidatedPromptTemplate(PromptTemplate):
+    def format_prompt(self, **kwargs):
+        # Custom validation logic
+        if 'email' in kwargs:
+            email = kwargs['email']
+            if '@' not in email:
+                raise ValueError("Invalid email format")
+        
+        if 'age' in kwargs:
+            age = kwargs['age']
+            if not str(age).isdigit() or int(age) < 0 or int(age) > 150:
+                raise ValueError("Age must be a valid number between 0 and 150")
+        
+        return super().format_prompt(**kwargs)
+
+# Create validated template
+template = """
+Create a personalized welcome message for:
+Name: {name}
+Email: {email}
+Age: {age}
+Interests: {interests}
+
+Welcome message:"""
+
+validated_prompt = ValidatedPromptTemplate(
+    input_variables=["name", "email", "age", "interests"],
+    template=template
+)
+
+try:
+    result = validated_prompt.format(
+        name="John Doe",
+        email="john@example.com",
+        age="25",
+        interests="programming, reading, hiking"
+    )
+    print(result)
+except ValueError as e:
+    print(f"Validation error: {e}")`
+                        }
+                    ]
+                },
+                memory: {
+                    title: 'Memory - Code Examples',
+                    examples: [
+                        {
+                            subtitle: '1. Conversation Buffer Memory',
+                            description: 'Stores the complete conversation history in memory as-is. Simple and preserves full context but can become memory-intensive for long conversations. Best for short to medium conversations where full context is important.',
+                            code: `from langchain.memory import ConversationBufferMemory
+from langchain.chains import ConversationChain
+
+# Create memory
+memory = ConversationBufferMemory()
+
+# Create conversation chain with memory
+conversation = ConversationChain(
+    llm=llm,
+    memory=memory,
+    verbose=True
+)
+
+# Have a conversation
+response1 = conversation.predict(input="Hi, my name is John")
+response2 = conversation.predict(input="What's my name?")
+
+# Memory automatically remembers the context
+print(memory.buffer)`
+                        },
+                        {
+                            subtitle: '2. Conversation Summary Memory',
+                            description: 'Automatically summarizes conversation history to save space while retaining key information. Memory-efficient for long conversations but may lose some details. Ideal for extended interactions where you need context but want to control memory usage.',
+                            code: `from langchain.memory import ConversationSummaryMemory
+
+# Create summary memory (good for long conversations)
+memory = ConversationSummaryMemory(llm=llm)
+
+# Add messages to memory
+memory.save_context(
+    {"input": "Hi, I'm planning a trip to Japan"},
+    {"output": "That sounds exciting! What cities are you planning to visit?"}
+)
+
+memory.save_context(
+    {"input": "I want to visit Tokyo and Kyoto"},
+    {"output": "Great choices! Both cities offer unique experiences."}
+)
+
+# Get the summary
+print(memory.buffer)  # Will contain a summary of the conversation`
+                        },
+                        {
+                            subtitle: '3. Conversation Buffer Window Memory',
+                            description: 'Keeps only the last K interactions in memory, discarding older messages. Provides fixed memory usage and maintains recent context. Perfect for applications with memory constraints or when only recent conversation context is needed.',
+                            code: `from langchain.memory import ConversationBufferWindowMemory
+
+# Keep only last K interactions (memory efficient)
+memory = ConversationBufferWindowMemory(k=2)  # Keep last 2 exchanges
+
+conversation = ConversationChain(
+    llm=llm,
+    memory=memory
+)
+
+# Have multiple conversations
+conversation.predict(input="Hi there!")
+conversation.predict(input="What's the weather like?")
+conversation.predict(input="Tell me a joke")
+conversation.predict(input="What did we just talk about?")
+
+# Only remembers last 2 interactions
+print(memory.buffer)`
+                        }
+                    ]
+                },
+                agents: {
+                    title: 'Agents - Code Examples',
+                    examples: [
+                        {
+                            subtitle: '1. Basic Agent with Tools',
+                            description: 'An autonomous agent that can decide which tools to use based on user input. Makes intelligent decisions about when to perform calculations, get current time, or use other utilities. Perfect for task automation and multi-step problem solving.',
+                            code: `from langchain.agents import initialize_agent, Tool
+from langchain.agents import AgentType
+from langchain.llms import OpenAI
+import datetime
+
+# Define tools
+def get_current_time(input=""):
+    return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+def calculate(expression):
+    try:
+        return str(eval(expression))
+    except:
+        return "Invalid calculation"
+
+tools = [
+    Tool(
+        name="Current Time",
+        func=get_current_time,
+        description="Get the current date and time"
+    ),
+    Tool(
+        name="Calculator",
+        func=calculate,
+        description="Perform mathematical calculations"
+    )
+]
+
+# Create agent
+agent = initialize_agent(
+    tools,
+    llm,
+    agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
+    verbose=True
+)
+
+# Use agent
+result = agent.run("What time is it and what's 25 * 4?")`
+                        },
+                        {
+                            subtitle: '2. Custom Agent with Memory',
+                            description: 'Combines agent decision-making with conversation memory to maintain context across interactions. Remembers previous conversations while dynamically choosing tools. Ideal for personal assistants, ongoing project management, and contextual task automation.',
+                            code: `from langchain.agents import AgentExecutor
+from langchain.memory import ConversationBufferMemory
+
+# Create memory for the agent
+memory = ConversationBufferMemory(memory_key="chat_history")
+
+# Create agent with memory
+agent = initialize_agent(
+    tools,
+    llm,
+    agent=AgentType.CONVERSATIONAL_REACT_DESCRIPTION,
+    memory=memory,
+    verbose=True
+)
+
+# Have a conversation with memory
+response1 = agent.run("My name is Alice and I like pizza")
+response2 = agent.run("What's my name and what do I like?")`
+                        },
+                        {
+                            subtitle: '3. Web Search Agent',
+                            description: 'An intelligent agent that can search the internet for current information and answer questions based on real-time data. Automatically decides when to search vs. use existing knowledge. Essential for applications requiring up-to-date information like news, prices, or current events.',
+                            code: `from langchain.utilities import GoogleSearchAPIWrapper
+from langchain.agents import initialize_agent, Tool
+
+# Create search tool
+search = GoogleSearchAPIWrapper()
+
+search_tool = Tool(
+    name="Google Search",
+    description="Search Google for current information",
+    func=search.run
+)
+
+# Create agent with search capability
+search_agent = initialize_agent(
+    [search_tool],
+    llm,
+    agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
+    verbose=True
+)
+
+# Search for current information
+result = search_agent.run("What are the latest developments in AI?")`
+                        }
+                    ]
+                },
+                vectorstores: {
+                    title: 'Vector Stores - Code Examples',
+                    examples: [
+                        {
+                            subtitle: '1. Basic Vector Store with Chroma',
+                            description: 'A persistent, easy-to-use vector database that stores document embeddings for similarity search. Automatically handles embedding generation and provides simple querying. Perfect for document Q&A systems, knowledge bases, and RAG applications where you need semantic search capabilities.',
+                            code: `from langchain.vectorstores import Chroma
+from langchain.embeddings import OpenAIEmbeddings
+from langchain.text_splitter import CharacterTextSplitter
+from langchain.document_loaders import TextLoader
+
+# Load documents
+loader = TextLoader('document.txt')
+documents = loader.load()
+
+# Split text
+text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
+docs = text_splitter.split_documents(documents)
+
+# Create embeddings
+embeddings = OpenAIEmbeddings()
+
+# Create vector store
+vectorstore = Chroma.from_documents(docs, embeddings)
+
+# Search for similar documents
+query = "What is machine learning?"
+similar_docs = vectorstore.similarity_search(query, k=3)
+
+for doc in similar_docs:
+    print(doc.page_content[:100] + "...")
+    print("---")`
+                        },
+                        {
+                            subtitle: '2. Vector Store with FAISS',
+                            description: 'Facebook AI Similarity Search - a high-performance vector store optimized for fast similarity search at scale. Supports local file persistence and handles large datasets efficiently. Ideal for production applications requiring fast search performance and when working with millions of documents.',
+                            code: `from langchain.vectorstores import FAISS
+from langchain.embeddings import OpenAIEmbeddings
+
+# Sample texts
+texts = [
+    "LangChain is a framework for developing applications powered by language models",
+    "Vector stores enable similarity search over documents",
+    "RAG combines retrieval with generation for better responses",
+    "Embeddings convert text into numerical representations"
+]
+
+# Create embeddings
+embeddings = OpenAIEmbeddings()
+
+# Create FAISS vector store
+vectorstore = FAISS.from_texts(texts, embeddings)
+
+# Save the vector store
+vectorstore.save_local("faiss_index")
+
+# Load the vector store
+new_vectorstore = FAISS.load_local("faiss_index", embeddings)
+
+# Search
+results = new_vectorstore.similarity_search("What is LangChain?", k=2)`
+                        },
+                        {
+                            subtitle: '3. Vector Store with Metadata',
+                            description: 'Enhanced vector storage that includes additional information (metadata) with each document for filtering and organization. Enables advanced search with conditions like source, category, date, or custom tags. Essential for enterprise applications requiring document categorization, access control, and filtered search results.',
+                            code: `from langchain.vectorstores import Chroma
+from langchain.schema import Document
+
+# Create documents with metadata
+docs = [
+    Document(
+        page_content="Python is a programming language",
+        metadata={"source": "programming.txt", "category": "tech"}
+    ),
+    Document(
+        page_content="Paris is the capital of France",
+        metadata={"source": "geography.txt", "category": "geography"}
+    ),
+    Document(
+        page_content="Machine learning is a subset of AI",
+        metadata={"source": "ai.txt", "category": "tech"}
+    )
+]
+
+# Create vector store
+vectorstore = Chroma.from_documents(docs, embeddings)
+
+# Search with metadata filter
+results = vectorstore.similarity_search(
+    "programming",
+    k=2,
+    filter={"category": "tech"}
+)
+
+for result in results:
+    print(f"Content: {result.page_content}")
+    print(f"Metadata: {result.metadata}")
+    print("---")`
+                        }
+                    ]
+                },
+                retrievers: {
+                    title: 'Retrievers - Code Examples',
+                    examples: [
+                        {
+                            subtitle: '1. Basic Vector Store Retriever',
+                            description: 'A straightforward retriever that finds documents based on similarity to the user query using vector embeddings. Simple one-to-one query matching with configurable result limits. Best for basic RAG applications, simple Q&A systems, and when you need direct semantic similarity without query optimization.',
+                            code: `from langchain.vectorstores import Chroma
+from langchain.embeddings import OpenAIEmbeddings
+
+# Create vector store (from previous examples)
+texts = ["LangChain documentation", "Vector store examples", "Retrieval methods"]
+vectorstore = Chroma.from_texts(texts, OpenAIEmbeddings())
+
+# Create retriever
+retriever = vectorstore.as_retriever(
+    search_type="similarity",
+    search_kwargs={"k": 2}
+)
+
+# Use retriever
+docs = retriever.get_relevant_documents("LangChain examples")
+for doc in docs:
+    print(doc.page_content)`
+                        },
+                        {
+                            subtitle: '2. Multi-Query Retriever',
+                            description: 'Automatically generates multiple variations of the user query to improve retrieval accuracy and coverage. Uses LLM to create alternative phrasings and searches with all variants to find more comprehensive results. Ideal for complex questions, ambiguous queries, and when you need broader context coverage.',
+                            code: `from langchain.retrievers.multi_query import MultiQueryRetriever
+from langchain.llms import OpenAI
+
+# Create base retriever
+base_retriever = vectorstore.as_retriever()
+
+# Create multi-query retriever
+retriever = MultiQueryRetriever.from_llm(
+    retriever=base_retriever,
+    llm=OpenAI()
+)
+
+# This will generate multiple queries for better results
+docs = retriever.get_relevant_documents(
+    "How to use LangChain for document analysis?"
+)
+
+print(f"Retrieved {len(docs)} documents")
+for i, doc in enumerate(docs):
+    print(f"Doc {i+1}: {doc.page_content[:100]}...")`
+                        },
+                        {
+                            subtitle: '3. Contextual Compression Retriever',
+                            description: 'Retrieves relevant documents and then compresses them to extract only the most pertinent information for the query. Uses LLM to filter and condense content, removing irrelevant sections. Perfect for large documents, noisy data sources, and when you need precise, focused context without information overload.',
+                            code: `from langchain.retrievers import ContextualCompressionRetriever
+from langchain.retrievers.document_compressors import LLMChainExtractor
+
+# Create base retriever
+base_retriever = vectorstore.as_retriever()
+
+# Create compressor
+compressor = LLMChainExtractor.from_llm(OpenAI())
+
+# Create compression retriever
+compression_retriever = ContextualCompressionRetriever(
+    base_compressor=compressor,
+    base_retriever=base_retriever
+)
+
+# Get compressed, relevant documents
+compressed_docs = compression_retriever.get_relevant_documents(
+    "What are the key features of LangChain?"
+)
+
+for doc in compressed_docs:
+    print(doc.page_content)
+    print("---")`
+                        }
+                    ]
+                }
+            };
+            
+            const content = codeExamples[componentType];
+            
+            // Set the title in the header
+            document.getElementById('modalTitle').innerHTML = `<h2 class="modal-title">${content.title}</h2>`;
+            
+            // Build the body content
+            let modalHTML = '';
+            content.examples.forEach(example => {
+                // Properly format code with preserved line breaks
+                const formattedCode = example.code
+                    .split('\n')
+                    .map(line => line.trim())
+                    .filter(line => line.length > 0)
+                    .join('\n');
+                
+                modalHTML += `
+                    <div class="code-example">
+                        <div class="example-subtitle">${example.subtitle}</div>
+                        ${example.description ? `<div class="example-description">${example.description}</div>` : ''}
+                        <div class="code-block"><pre><code>${formattedCode}</code></pre></div>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('modalContent').innerHTML = modalHTML;
+            document.getElementById('codeModal').style.display = 'flex';
+        }
+        
+        function closeModal() {
+            document.getElementById('codeModal').style.display = 'none';
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('codeModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

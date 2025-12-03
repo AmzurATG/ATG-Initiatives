@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Chunking Strategies for RAG</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        nav {
+            background: #f8f9fa;
+            padding: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 3px solid #f093fb;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        nav span {
+            text-decoration: none;
+            color: #f093fb;
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: all 0.3s;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        nav span:hover {
+            background: #f093fb;
+            color: white;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        section {
+            margin-bottom: 60px;
+            scroll-margin-top: 100px;
+        }
+
+        h2 {
+            color: #f093fb;
+            font-size: 2em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #f093fb;
+        }
+
+        h3 {
+            color: #f5576c;
+            font-size: 1.5em;
+            margin: 30px 0 15px 0;
+        }
+
+        .code-block {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+        }
+
+        .code-block code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .keyword { color: #c678dd; }
+        .function { color: #61afef; }
+        .string { color: #98c379; }
+        .comment { color: #5c6370; }
+        .number { color: #d19a66; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-left: 4px solid #f093fb;
+        }
+
+        .highlight {
+            background: #fff3cd;
+            padding: 15px;
+            border-left: 4px solid #ffc107;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .checklist {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .checklist li {
+            padding: 10px;
+            margin: 5px 0;
+            background: #f8f9fa;
+            border-radius: 5px;
+            position: relative;
+            padding-left: 40px;
+        }
+
+        .checklist li:before {
+            content: "✓";
+            position: absolute;
+            left: 15px;
+            color: #f093fb;
+            font-size: 1.2em;
+        }
+
+        .pill {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            margin: 2px;
+        }
+
+        .pill-success { background: #d4edda; color: #155724; }
+        .pill-warning { background: #fff3cd; color: #856404; }
+        .pill-danger { background: #f8d7da; color: #721c24; }
+        .pill-info { background: #d1ecf1; color: #0c5460; }
+
+        .visual-box {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .chunk-example {
+            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+            border-left: 4px solid #f093fb;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .back-to-menu {
+            display: inline-block;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 15px;
+            text-decoration: none;
+            font-size: 0.8em;
+            font-weight: 500;
+            margin-left: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            vertical-align: middle;
+        }
+
+        .back-to-menu:hover {
+            background: linear-gradient(135deg, #d081fb 0%, #f3456c 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(240, 147, 251, 0.3);
+        }
+
+        .back-to-menu::before {
+            content: "↑ ";
+            margin-right: 3px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .section-header h2 {
+            margin: 0;
+            flex: 1;
+        }
+
+        /* Collapsible code sections */
+        .code-section-card {
+            background: white;
+            border-radius: 12px;
+            margin: 20px 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: 2px solid #f093fb;
+            overflow: hidden;
+        }
+
+        .code-section-header {
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .code-section-header:hover {
+            background: linear-gradient(135deg, #d081fb 0%, #f3456c 100%);
+        }
+
+        .code-section-header h4 {
+            margin: 0;
+            font-size: 1.2em;
+            color: white;
+        }
+
+        .toggle-icon {
+            font-size: 1.2em;
+            transition: transform 0.3s ease;
+        }
+
+        .toggle-icon.rotated {
+            transform: rotate(90deg);
+        }
+
+        .code-section-content {
+            max-height: 1000px;
+            overflow: hidden;
+            transition: all 0.5s ease;
+            opacity: 1;
+        }
+
+        .code-section-content.collapsed {
+            max-height: 0;
+            padding: 0;
+            opacity: 0;
+        }
+
+        @media (max-width: 768px) {
+            nav ul {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Document Chunking Strategies</h1>
+            <p>The Foundation of High-Quality RAG Systems</p>
+        </header>
+
+        <nav id="navigation-menu">
+            <ul>
+                <li><span onclick="document.getElementById('why-chunking').scrollIntoView({behavior: 'smooth'})">Chunking Benefits</span></li>
+                <li><span onclick="document.getElementById('methods').scrollIntoView({behavior: 'smooth'})">Methods</span></li>
+                <li><span onclick="document.getElementById('chunk-size').scrollIntoView({behavior: 'smooth'})">Chunk Size</span></li>
+                <li><span onclick="document.getElementById('overlap').scrollIntoView({behavior: 'smooth'})">Overlap</span></li>
+                <li><span onclick="document.getElementById('metadata').scrollIntoView({behavior: 'smooth'})">Metadata</span></li>
+                <li><span onclick="document.getElementById('implementation').scrollIntoView({behavior: 'smooth'})">Implementation</span></li>
+                <li><span onclick="document.getElementById('pitfalls').scrollIntoView({behavior: 'smooth'})">Pitfalls</span></li>
+                <li><span onclick="document.getElementById('checklist').scrollIntoView({behavior: 'smooth'})">Checklist</span></li>
+            </ul>
+        </nav>
+
+        <div class="content">
+            <section id="why-chunking">
+                <div class="section-header">
+                    <h2>1. Why Chunking Matters</h2>
+                    <span class="back-to-menu" onclick="document.getElementById('navigation-menu').scrollIntoView({behavior: 'smooth'}); return false;">Back to Menu</span>
+                </div>
+                
+                <div style="background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%); padding: 25px; border-radius: 10px; border-left: 5px solid #e17055;">
+                    <h3 style="color: #d63031; margin-top: 0;">The Core Problem</h3>
+                    <p style="font-size: 1.1em; margin: 10px 0;">
+                        <strong>Documents are too large for LLM context windows, but embeddings only work on complete units.</strong>
+                    </p>
+                    <p style="margin: 10px 0;">Solution: Break documents into <strong>semantically meaningful chunks</strong> that can be:</p>
+                    <ul style="margin: 10px 0 10px 30px;">
+                        <li>Embedded independently</li>
+                        <li>Retrieved based on relevance</li>
+                        <li>Fit within LLM context windows</li>
+                    </ul>
+                </div>
+
+                <h3>The Impact of Poor Chunking</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Issue</th>
+                            <th>Cause</th>
+                            <th>User Experience</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Lost Context</strong></td>
+                            <td>Chunks too small (< 200 tokens)</td>
+                            <td>"The answer seems incomplete or wrong"</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Irrelevant Results</strong></td>
+                            <td>Chunks too large (> 1500 tokens)</td>
+                            <td>"Why did it return this entire page?"</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Missing Information</strong></td>
+                            <td>No overlap between chunks</td>
+                            <td>"It couldn't find info that's definitely there"</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Poor Semantic Match</strong></td>
+                            <td>Random sentence breaks</td>
+                            <td>"The search results don't make sense"</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="highlight">
+                    <strong>Key Insight:</strong> Chunking is NOT just about splitting text - it's about preserving semantic meaning while optimizing for retrieval and generation.
+                </div>
+            </section>
+
+            <section id="methods">
+                <div class="section-header">
+                    <h2>2. Chunking Methods Comparison</h2>
+                    <span class="back-to-menu" onclick="document.getElementById('navigation-menu').scrollIntoView({behavior: 'smooth'}); return false;">Back to Menu</span>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0;">
+                    <div style="background: white; border: 3px solid #00b894; border-radius: 10px; padding: 20px;">
+                        <h3 style="color: #00b894; margin-top: 0;">✅ Fixed-Size Chunking</h3>
+                        <p><strong>Method:</strong> Split by character/token count</p>
+                        <div style="margin: 15px 0;">
+                            <span class="pill pill-success">Simple</span>
+                            <span class="pill pill-success">Fast</span>
+                            <span class="pill pill-warning">May break sentences</span>
+                        </div>
+                        <p><strong>Best For:</strong> General documents, quick prototyping</p>
+                        <p><strong>Chunk Size:</strong> 500-1000 tokens</p>
+                        <p><strong>Overlap:</strong> 50-200 tokens (10-20%)</p>
+                    </div>
+
+                    <div style="background: white; border: 3px solid #0984e3; border-radius: 10px; padding: 20px;">
+                        <h3 style="color: #0984e3; margin-top: 0;">✅ Sentence-Based Chunking</h3>
+                        <p><strong>Method:</strong> Split at sentence boundaries</p>
+                        <div style="margin: 15px 0;">
+                            <span class="pill pill-success">Clean breaks</span>
+                            <span class="pill pill-success">Good semantics</span>
+                            <span class="pill pill-info">Moderate complexity</span>
+                        </div>
+                        <p><strong>Best For:</strong> Articles, reports, documentation</p>
+                        <p><strong>Chunk Size:</strong> 5-10 sentences</p>
+                        <p><strong>Overlap:</strong> 1-2 sentences</p>
+                    </div>
+
+                    <div style="background: white; border: 3px solid #6c5ce7; border-radius: 10px; padding: 20px;">
+                        <h3 style="color: #6c5ce7; margin-top: 0;">✅ Paragraph/Section-Based</h3>
+                        <p><strong>Method:</strong> Split by natural document structure</p>
+                        <div style="margin: 15px 0;">
+                            <span class="pill pill-success">Semantic integrity</span>
+                            <span class="pill pill-warning">Variable sizes</span>
+                            <span class="pill pill-info">Structure-dependent</span>
+                        </div>
+                        <p><strong>Best For:</strong> Structured docs, legal, academic</p>
+                        <p><strong>Chunk Size:</strong> Variable (aim 400-1200 tokens)</p>
+                        <p><strong>Overlap:</strong> Last paragraph of previous chunk</p>
+                    </div>
+
+                    <div style="background: white; border: 3px solid #fd79a8; border-radius: 10px; padding: 20px;">
+                        <h3 style="color: #fd79a8; margin-top: 0;">🚀 Semantic Chunking</h3>
+                        <p><strong>Method:</strong> AI-powered semantic boundary detection</p>
+                        <div style="margin: 15px 0;">
+                            <span class="pill pill-success">Best quality</span>
+                            <span class="pill pill-danger">Slow</span>
+                            <span class="pill pill-danger">Expensive</span>
+                        </div>
+                        <p><strong>Best For:</strong> High-value documents, critical accuracy</p>
+                        <p><strong>Chunk Size:</strong> Dynamic based on topic shifts</p>
+                        <p><strong>Overlap:</strong> Intelligent context preservation</p>
+                    </div>
+                </div>
+
+                <h3>Visual Example: How Different Methods Split Text</h3>
+                <div class="visual-box">
+                    <p style="margin-bottom: 15px;"><strong>Original Document:</strong></p>
+                    <div style="background: #e3f2fd; padding: 10px; border-radius: 5px; margin-bottom: 20px;">
+                        "Machine learning has revolutionized data science. It enables computers to learn from data. Deep learning, a subset of ML, uses neural networks. These networks mimic the human brain."
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-top: 20px;">
+                        <div>
+                            <p><strong>Fixed-Size (30 chars):</strong></p>
+                            <div class="chunk-example">
+                                Chunk 1: "Machine learning has revoluti"<br><br>
+                                Chunk 2: "onized data science. It enabl"<br><br>
+                                Chunk 3: "es computers to learn from da"<br><br>
+                                <span style="color: #e74c3c;">❌ Breaks words mid-sentence</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <p><strong>Sentence-Based (2 sentences):</strong></p>
+                            <div class="chunk-example">
+                                Chunk 1: "Machine learning has revolutionized data science. It enables computers to learn from data."<br><br>
+                                Chunk 2: "It enables computers to learn from data. Deep learning, a subset of ML, uses neural networks."<br><br>
+                                <span style="color: #27ae60;">✅ Clean, readable chunks</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <p><strong>Semantic (topic-based):</strong></p>
+                            <div class="chunk-example">
+                                Chunk 1: "Machine learning has revolutionized data science. It enables computers to learn from data."<br><br>
+                                Chunk 2: "Deep learning, a subset of ML, uses neural networks. These networks mimic the human brain."<br><br>
+                                <span style="color: #27ae60;">✅ Topic shift detected between ML overview and DL specifics</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="chunk-size">
+                <div class="section-header">
+                    <h2>3. Optimal Chunk Size Selection</h2>
+                    <span class="back-to-menu" onclick="document.getElementById('navigation-menu').scrollIntoView({behavior: 'smooth'}); return false;">Back to Menu</span>
+                </div>
+
+                <div style="background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%); color: white; padding: 25px; border-radius: 10px; margin: 20px 0;">
+                    <h3 style="color: white; margin-top: 0;">The Golden Range: 500-1000 Tokens</h3>
+                    <p style="font-size: 1.1em;">This range balances semantic completeness with retrieval precision for most use cases.</p>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Chunk Size</th>
+                            <th>Pros</th>
+                            <th>Cons</th>
+                            <th>Best Use Case</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>100-300 tokens</strong><br><span class="pill pill-danger">Too Small</span></td>
+                            <td>
+                                • Fast retrieval<br>
+                                • Low storage
+                            </td>
+                            <td>
+                                • Lost context<br>
+                                • Incomplete information<br>
+                                • Many false positives
+                            </td>
+                            <td>FAQ systems, simple Q&A</td>
+                        </tr>
+                        <tr>
+                            <td><strong>400-600 tokens</strong><br><span class="pill pill-success">Good</span></td>
+                            <td>
+                                • Balanced context<br>
+                                • Good retrieval<br>
+                                • Manageable size
+                            </td>
+                            <td>
+                                • May split topics<br>
+                                • Needs good overlap
+                            </td>
+                            <td>Articles, blog posts, general docs</td>
+                        </tr>
+                        <tr>
+                            <td><strong>700-1000 tokens</strong><br><span class="pill pill-success">Optimal</span></td>
+                            <td>
+                                • Rich context<br>
+                                • Complete thoughts<br>
+                                • Better accuracy
+                            </td>
+                            <td>
+                                • Slightly slower<br>
+                                • More storage
+                            </td>
+                            <td>Technical docs, research papers</td>
+                        </tr>
+                        <tr>
+                            <td><strong>1200-1500 tokens</strong><br><span class="pill pill-warning">Large</span></td>
+                            <td>
+                                • Full context<br>
+                                • Detailed info
+                            </td>
+                            <td>
+                                • Slower retrieval<br>
+                                • Less precise<br>
+                                • Wastes context window
+                            </td>
+                            <td>Legal documents, detailed analysis</td>
+                        </tr>
+                        <tr>
+                            <td><strong>1500+ tokens</strong><br><span class="pill pill-danger">Too Large</span></td>
+                            <td>
+                                • Maximum context
+                            </td>
+                            <td>
+                                • Very slow<br>
+                                • Poor retrieval precision<br>
+                                • High cost<br>
+                                • Embedding quality degrades
+                            </td>
+                            <td>Avoid in production</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>How to Calculate Token Count</h3>
+                <div class="code-block">
+<code><span class="keyword">import</span> tiktoken
+
+<span class="comment"># For OpenAI models</span>
+encoding = tiktoken.<span class="function">encoding_for_model</span>(<span class="string">"gpt-4"</span>)
+
+text = <span class="string">"Your document text here..."</span>
+tokens = encoding.<span class="function">encode</span>(text)
+token_count = <span class="function">len</span>(tokens)
+
+<span class="function">print</span>(<span class="string">f"Token count: {token_count}"</span>)
+
+<span class="comment"># Approximate: 1 token ≈ 4 characters in English</span>
+<span class="comment"># So 1000 tokens ≈ 750 words ≈ 4000 characters</span></code>
+                </div>
+
+                <div class="highlight">
+                    <strong>Pro Tip:</strong> Start with 800 tokens per chunk and adjust based on your document type and retrieval quality metrics.
+                </div>
+            </section>
+
+            <section id="overlap">
+                <div class="section-header">
+                    <h2>4. Chunk Overlap Strategies</h2>
+                    <span class="back-to-menu" onclick="document.getElementById('navigation-menu').scrollIntoView({behavior: 'smooth'}); return false;">Back to Menu</span>
+                </div>
+
+                <div style="background: #fff3cd; padding: 20px; border-left: 4px solid #ffc107; border-radius: 5px; margin: 20px 0;">
+                    <h3 style="color: #856404; margin-top: 0;">Why Overlap Matters</h3>
+                    <p>Without overlap, important information at chunk boundaries gets split and lost. Overlap ensures continuity and captures cross-boundary context.</p>
+                </div>
+
+                <h3>Overlap Strategies</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Overlap %</th>
+                            <th>Overlap Size</th>
+                            <th>Benefit</th>
+                            <th>Trade-off</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>0%</strong></td>
+                            <td>No overlap</td>
+                            <td>Minimal storage</td>
+                            <td><span class="pill pill-danger">High risk of lost context</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>10%</strong></td>
+                            <td>50-100 tokens</td>
+                            <td>Basic continuity</td>
+                            <td><span class="pill pill-warning">May miss complex relationships</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>15-20%</strong></td>
+                            <td>100-200 tokens</td>
+                            <td><span class="pill pill-success">Optimal balance</span></td>
+                            <td>Moderate storage increase</td>
+                        </tr>
+                        <tr>
+                            <td><strong>25-30%</strong></td>
+                            <td>200-300 tokens</td>
+                            <td>Excellent context</td>
+                            <td>Higher storage, more duplicates</td>
+                        </tr>
+                        <tr>
+                            <td><strong>50%+</strong></td>
+                            <td>400+ tokens</td>
+                            <td>Maximum coverage</td>
+                            <td><span class="pill pill-danger">Inefficient, redundant</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Visual Example: Impact of Overlap</h3>
+                <div class="visual-box">
+                    <p><strong>No Overlap (❌ Poor):</strong></p>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0;">
+                        <div style="background: #e3f2fd; padding: 10px; border-radius: 5px;">
+                            Chunk 1: "...the company achieved record revenue in Q4 2024."
+                        </div>
+                        <div style="background: #f3e5f5; padding: 10px; border-radius: 5px;">
+                            Chunk 2: "The growth was driven by international expansion..."
+                        </div>
+                    </div>
+                    <p style="color: #e74c3c;">Problem: Query "what drove Q4 revenue growth" might miss both chunks!</p>
+
+                    <p style="margin-top: 20px;"><strong>20% Overlap (✅ Good):</strong></p>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0;">
+                        <div style="background: #e3f2fd; padding: 10px; border-radius: 5px;">
+                            Chunk 1: "...the company achieved record revenue in Q4 2024. <span style="background: #ffd700;">The growth was driven</span>"
+                        </div>
+                        <div style="background: #f3e5f5; padding: 10px; border-radius: 5px;">
+                            <span style="background: #ffd700;">"record revenue in Q4 2024. The growth was driven</span> by international expansion..."
+                        </div>
+                    </div>
+                    <p style="color: #27ae60;">Solution: Both chunks contain the critical connection!</p>
+                </div>
+
+                <h3>Implementation Example</h3>
+                <div class="code-block">
+<code><span class="keyword">from</span> langchain.text_splitter <span class="keyword">import</span> RecursiveCharacterTextSplitter
+
+<span class="comment"># Recommended configuration</span>
+text_splitter = RecursiveCharacterTextSplitter(
+    chunk_size=<span class="number">800</span>,           <span class="comment"># 800 tokens</span>
+    chunk_overlap=<span class="number">160</span>,        <span class="comment"># 20% overlap</span>
+    length_function=<span class="function">len</span>,
+    separators=[<span class="string">"\n\n"</span>, <span class="string">"\n"</span>, <span class="string">". "</span>, <span class="string">" "</span>, <span class="string">""</span>]
+)
+
+chunks = text_splitter.<span class="function">split_text</span>(document_text)</code>
+                </div>
+            </section>
+
+            <section id="metadata">
+                <div class="section-header">
+                    <h2>5. Metadata Preservation</h2>
+                    <span class="back-to-menu" onclick="document.getElementById('navigation-menu').scrollIntoView({behavior: 'smooth'}); return false;">Back to Menu</span>
+                </div>
+
+                <div class="card">
+                    <h3>Why Metadata is Critical</h3>
+                    <p>Metadata helps with:</p>
+                    <ul style="margin: 10px 0 10px 20px;">
+                        <li>Source attribution ("This info came from page 5 of contract.pdf")</li>
+                        <li>Filtering results (only search in specific documents)</li>
+                        <li>Ranking and relevance scoring</li>
+                        <li>Audit trails and compliance</li>
+                    </ul>
+                </div>
+
+                <h3>Essential Metadata Fields</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Field</th>
+                            <th>Example</th>
+                            <th>Purpose</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>document_id</strong></td>
+                            <td>"doc_12345"</td>
+                            <td>Link chunk back to source document</td>
+                        </tr>
+                        <tr>
+                            <td><strong>chunk_index</strong></td>
+                            <td>3 (out of 15)</td>
+                            <td>Order chunks, retrieve surrounding context</td>
+                        </tr>
+                        <tr>
+                            <td><strong>page_number</strong></td>
+                            <td>42</td>
+                            <td>Source attribution for PDFs</td>
+                        </tr>
+                        <tr>
+                            <td><strong>section_title</strong></td>
+                            <td>"Financial Results"</td>
+                            <td>Provide context, improve relevance</td>
+                        </tr>
+                        <tr>
+                            <td><strong>document_type</strong></td>
+                            <td>"contract", "report"</td>
+                            <td>Filter by document category</td>
+                        </tr>
+                        <tr>
+                            <td><strong>timestamp</strong></td>
+                            <td>2024-01-15</td>
+                            <td>Recency filtering, version control</td>
+                        </tr>
+                        <tr>
+                            <td><strong>author</strong></td>
+                            <td>"Legal Team"</td>
+                            <td>Authority and trust signals</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Database Schema Examples</h3>
+                
+                <div class="code-section-card">
+                    <div class="code-section-header" onclick="toggleCodeSection('postgresql')">
+                        <h4>1. PostgreSQL + pgvector (Recommended for Project 6)</h4>
+                        <span class="toggle-icon" id="icon-postgresql">▶</span>
+                    </div>
+                    <div class="code-section-content" id="postgresql">
+                        <div class="code-block">
+<code><span class="comment">-- Create tables for document chunks with metadata</span>
+<span class="keyword">CREATE EXTENSION</span> vector;
+
+<span class="keyword">CREATE TABLE</span> documents (
+    id UUID <span class="keyword">PRIMARY KEY DEFAULT</span> gen_random_uuid(),
+    user_id UUID <span class="keyword">NOT NULL</span>,
+    filename VARCHAR(<span class="number">255</span>) <span class="keyword">NOT NULL</span>,
+    file_type VARCHAR(<span class="number">50</span>),
+    upload_date TIMESTAMP <span class="keyword">DEFAULT</span> CURRENT_TIMESTAMP,
+    total_chunks INTEGER
+);
+
+<span class="keyword">CREATE TABLE</span> document_chunks (
+    id UUID <span class="keyword">PRIMARY KEY DEFAULT</span> gen_random_uuid(),
+    document_id UUID <span class="keyword">REFERENCES</span> documents(id) <span class="keyword">ON DELETE CASCADE</span>,
+    chunk_index INTEGER <span class="keyword">NOT NULL</span>,
+    content TEXT <span class="keyword">NOT NULL</span>,
+    embedding vector(<span class="number">1536</span>),  <span class="comment">-- OpenAI embedding dimension</span>
+    
+    <span class="comment">-- Metadata columns</span>
+    page_number INTEGER,
+    section_title VARCHAR(<span class="number">255</span>),
+    char_count INTEGER,
+    token_count INTEGER,
+    created_at TIMESTAMP <span class="keyword">DEFAULT</span> CURRENT_TIMESTAMP,
+    
+    <span class="comment">-- For efficient retrieval</span>
+    <span class="keyword">UNIQUE</span>(document_id, chunk_index)
+);
+
+<span class="comment">-- Create index for vector similarity search</span>
+<span class="keyword">CREATE INDEX</span> ON document_chunks 
+<span class="keyword">USING</span> ivfflat (embedding vector_cosine_ops)
+<span class="keyword">WITH</span> (lists = <span class="number">100</span>);
+
+<span class="comment">-- Index for metadata filtering</span>
+<span class="keyword">CREATE INDEX</span> idx_document_id ON document_chunks(document_id);
+<span class="keyword">CREATE INDEX</span> idx_page_number ON document_chunks(page_number);
+<span class="keyword">CREATE INDEX</span> idx_created_at ON document_chunks(created_at);</code>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="code-section-card">
+                    <div class="code-section-header" onclick="toggleCodeSection('chromadb')">
+                        <h4>2. ChromaDB (Simple Vector Database)</h4>
+                        <span class="toggle-icon" id="icon-chromadb">▶</span>
+                    </div>
+                    <div class="code-section-content" id="chromadb">
+                        <div class="code-block">
+<code><span class="keyword">import</span> chromadb
+<span class="keyword">from</span> chromadb.config <span class="keyword">import</span> Settings
+
+<span class="comment"># Initialize ChromaDB</span>
+client = chromadb.Client(Settings(
+    chroma_db_impl=<span class="string">"duckdb+parquet"</span>,
+    persist_directory=<span class="string">"./chroma_db"</span>
+))
+
+<span class="comment"># Create collection with metadata schema</span>
+collection = client.create_collection(
+    name=<span class="string">"document_chunks"</span>,
+    metadata={<span class="string">"hnsw:space"</span>: <span class="string">"cosine"</span>}
+)
+
+<span class="comment"># Add chunks with metadata</span>
+collection.add(
+    documents=[chunk.page_content <span class="keyword">for</span> chunk <span class="keyword">in</span> chunks],
+    embeddings=[chunk.embedding <span class="keyword">for</span> chunk <span class="keyword">in</span> chunks],
+    metadatas=[
+        {
+            <span class="string">"document_id"</span>: <span class="string">"doc_12345"</span>,
+            <span class="string">"chunk_index"</span>: i,
+            <span class="string">"source_file"</span>: <span class="string">"report.pdf"</span>,
+            <span class="string">"page_number"</span>: page_num,
+            <span class="string">"section"</span>: section,
+            <span class="string">"created_at"</span>: timestamp
+        }
+        <span class="keyword">for</span> i, (page_num, section, timestamp) <span class="keyword">in</span> <span class="function">enumerate</span>(metadata_list)
+    ],
+    ids=[<span class="string">f"chunk_{i}"</span> <span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(<span class="function">len</span>(chunks))]
+)
+
+<span class="comment"># Query with metadata filtering</span>
+results = collection.query(
+    query_embeddings=[query_embedding],
+    n_results=<span class="number">5</span>,
+    where={<span class="string">"document_id"</span>: <span class="string">"doc_12345"</span>, <span class="string">"page_number"</span>: {<span class="string">"$gte"</span>: <span class="number">10</span>}}
+)</code>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="code-section-card">
+                    <div class="code-section-header" onclick="toggleCodeSection('pinecone')">
+                        <h4>3. Pinecone (Cloud Vector Database)</h4>
+                        <span class="toggle-icon" id="icon-pinecone">▶</span>
+                    </div>
+                    <div class="code-section-content" id="pinecone">
+                        <div class="code-block">
+<code><span class="keyword">import</span> pinecone
+
+<span class="comment"># Initialize Pinecone</span>
+pinecone.init(api_key=<span class="string">"your-api-key"</span>, environment=<span class="string">"us-west1-gcp"</span>)
+
+<span class="comment"># Create index</span>
+pinecone.create_index(
+    name=<span class="string">"document-chunks"</span>,
+    dimension=<span class="number">1536</span>,
+    metric=<span class="string">"cosine"</span>
+)
+
+index = pinecone.Index(<span class="string">"document-chunks"</span>)
+
+<span class="comment"># Upsert vectors with metadata</span>
+vectors = [
+    (
+        <span class="string">f"chunk_{i}"</span>,           <span class="comment"># id</span>
+        embedding,                <span class="comment"># vector</span>
+        {                         <span class="comment"># metadata</span>
+            <span class="string">"document_id"</span>: <span class="string">"doc_12345"</span>,
+            <span class="string">"chunk_index"</span>: i,
+            <span class="string">"content"</span>: chunk_text,  <span class="comment"># Store text in metadata</span>
+            <span class="string">"page_number"</span>: page_num,
+            <span class="string">"section"</span>: section,
+            <span class="string">"source_file"</span>: <span class="string">"report.pdf"</span>
+        }
+    )
+    <span class="keyword">for</span> i, (embedding, chunk_text, page_num, section) <span class="keyword">in</span> <span class="function">enumerate</span>(data)
+]
+
+index.upsert(vectors=vectors)
+
+<span class="comment"># Query with filtering</span>
+results = index.query(
+    vector=query_embedding,
+    top_k=<span class="number">5</span>,
+    filter={
+        <span class="string">"document_id"</span>: {<span class="string">"$eq"</span>: <span class="string">"doc_12345"</span>},
+        <span class="string">"page_number"</span>: {<span class="string">"$gte"</span>: <span class="number">10</span>}
+    },
+    include_metadata=<span class="keyword">True</span>
+)</code>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="code-section-card">
+                    <div class="code-section-header" onclick="toggleCodeSection('langchain')">
+                        <h3>LangChain Integration Example</h3>
+                        <span class="toggle-icon" id="icon-langchain">▶</span>
+                    </div>
+                    <div class="code-section-content" id="langchain">
+                        <div class="code-block">
+<code><span class="keyword">from</span> langchain.schema <span class="keyword">import</span> Document
+
+<span class="comment"># Create chunks with metadata</span>
+chunks_with_metadata = []
+
+<span class="keyword">for</span> i, chunk_text <span class="keyword">in</span> <span class="function">enumerate</span>(chunks):
+    doc = Document(
+        page_content=chunk_text,
+        metadata={
+            <span class="string">"document_id"</span>: <span class="string">"doc_12345"</span>,
+            <span class="string">"chunk_index"</span>: i,
+            <span class="string">"total_chunks"</span>: <span class="function">len</span>(chunks),
+            <span class="string">"source_file"</span>: <span class="string">"annual_report.pdf"</span>,
+            <span class="string">"page_number"</span>: calculate_page(i),
+            <span class="string">"section"</span>: extract_section_title(chunk_text),
+            <span class="string">"created_at"</span>: datetime.<span class="function">now</span>().<span class="function">isoformat</span>()
+        }
+    )
+    chunks_with_metadata.<span class="function">append</span>(doc)
+
+<span class="comment"># Later: Filter during retrieval</span>
+results = vector_store.<span class="function">similarity_search</span>(
+    query,
+    filter={<span class="string">"document_type"</span>: <span class="string">"contract"</span>, <span class="string">"year"</span>: <span class="number">2024</span>}
+)</code>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="highlight">
+                    <strong>Choosing a Vector Database:</strong>
+                    <ul style="margin: 10px 0 0 20px;">
+                        <li><strong>PostgreSQL + pgvector:</strong> Best for Project 6 (already using PostgreSQL, no extra services)</li>
+                        <li><strong>ChromaDB:</strong> Easy local development, good for prototyping</li>
+                        <li><strong>Pinecone:</strong> Production-ready, fully managed, but costs money</li>
+                        <li><strong>Weaviate/Qdrant:</strong> Self-hosted alternatives with more features</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="implementation">
+                <div class="section-header">
+                    <h2>6. LangChain Implementation Guide</h2>
+                    <span class="back-to-menu" onclick="document.getElementById('navigation-menu').scrollIntoView({behavior: 'smooth'}); return false;">Back to Menu</span>
+                </div>
+
+                <h3>Text Splitter Methods Comparison</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th>RecursiveCharacterTextSplitter</th>
+                            <th>TokenTextSplitter</th>
+                            <th>SemanticChunker</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Split Method</strong></td>
+                            <td>Character count with smart separators</td>
+                            <td>Token count (model-specific)</td>
+                            <td>AI-powered semantic boundaries</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Speed</strong></td>
+                            <td><span class="pill pill-success">Very Fast</span> (~100ms/doc)</td>
+                            <td><span class="pill pill-success">Fast</span> (~150ms/doc)</td>
+                            <td><span class="pill pill-danger">Slow</span> (~2-5s/doc)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Accuracy</strong></td>
+                            <td><span class="pill pill-success">Good</span> (95% semantic integrity)</td>
+                            <td><span class="pill pill-success">Excellent</span> (100% token accurate)</td>
+                            <td><span class="pill pill-success">Excellent</span> (98% semantic integrity)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Cost</strong></td>
+                            <td><span class="pill pill-success">Free</span></td>
+                            <td><span class="pill pill-success">Free</span></td>
+                            <td><span class="pill pill-danger">$$</span> (API calls for embeddings)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Chunk Size Control</strong></td>
+                            <td>Approximate (±10%)</td>
+                            <td><span class="pill pill-success">Exact</span></td>
+                            <td>Dynamic (unpredictable)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Semantic Quality</strong></td>
+                            <td>Good (uses natural separators)</td>
+                            <td>Fair (may split mid-sentence)</td>
+                            <td><span class="pill pill-success">Excellent</span> (AI-detected topics)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Setup Complexity</strong></td>
+                            <td><span class="pill pill-success">Easy</span> (2 lines of code)</td>
+                            <td><span class="pill pill-success">Easy</span> (3 lines of code)</td>
+                            <td><span class="pill pill-warning">Moderate</span> (needs embeddings setup)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Best For</strong></td>
+                            <td>General docs, articles, blogs<br><strong>90% of use cases</strong></td>
+                            <td>Token-sensitive apps, API rate limits<br><strong>When exact token count matters</strong></td>
+                            <td>High-value docs, legal, medical<br><strong>When quality > cost/speed</strong></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Limitations</strong></td>
+                            <td>• Approximate token count<br>• May split long sentences</td>
+                            <td>• Requires tokenizer library<br>• May break semantic units</td>
+                            <td>• Slow processing<br>• High API costs<br>• Variable chunk sizes</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Recommended Use</strong></td>
+                            <td><span class="pill pill-success">Development</span><br><span class="pill pill-success">✓ Production</span></td>
+                            <td><span class="pill pill-info">Development</span><br><span class="pill pill-info">Token-critical apps</span></td>
+                            <td><span class="pill pill-warning">High-budget apps</span><br><span class="pill pill-warning">Critical accuracy</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Processing Time<br>(1000 page doc)</strong></td>
+                            <td>~2-3 seconds</td>
+                            <td>~5-8 seconds</td>
+                            <td>~5-10 minutes</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="code-section-card">
+                    <div class="code-section-header" onclick="toggleCodeSection('method1')">
+                        <h3>Method 1: RecursiveCharacterTextSplitter (Recommended)</h3>
+                        <span class="toggle-icon" id="icon-method1">▶</span>
+                    </div>
+                    <div class="code-section-content" id="method1">
+                        <div class="code-block">
+<code><span class="keyword">from</span> langchain.text_splitter <span class="keyword">import</span> RecursiveCharacterTextSplitter
+
+splitter = RecursiveCharacterTextSplitter(
+    chunk_size=<span class="number">800</span>,
+    chunk_overlap=<span class="number">160</span>,
+    length_function=<span class="function">len</span>,
+    separators=[
+        <span class="string">"\n\n"</span>,    <span class="comment"># Paragraphs first</span>
+        <span class="string">"\n"</span>,      <span class="comment"># Then newlines</span>
+        <span class="string">". "</span>,     <span class="comment"># Then sentences</span>
+        <span class="string">" "</span>,      <span class="comment"># Then words</span>
+        <span class="string">""</span>        <span class="comment"># Finally characters</span>
+    ]
+)
+
+chunks = splitter.<span class="function">split_text</span>(text)</code>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="code-section-card">
+                    <div class="code-section-header" onclick="toggleCodeSection('method2')">
+                        <h3>Method 2: TokenTextSplitter (For Token Accuracy)</h3>
+                        <span class="toggle-icon" id="icon-method2">▶</span>
+                    </div>
+                    <div class="code-section-content" id="method2">
+                        <div class="code-block">
+<code><span class="keyword">from</span> langchain.text_splitter <span class="keyword">import</span> TokenTextSplitter
+
+splitter = TokenTextSplitter(
+    chunk_size=<span class="number">800</span>,
+    chunk_overlap=<span class="number">160</span>,
+    encoding_name=<span class="string">"cl100k_base"</span>  <span class="comment"># GPT-4 tokenizer</span>
+)
+
+chunks = splitter.<span class="function">split_text</span>(text)</code>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="code-section-card">
+                    <div class="code-section-header" onclick="toggleCodeSection('method3')">
+                        <h3>Method 3: Semantic Splitter (Advanced)</h3>
+                        <span class="toggle-icon" id="icon-method3">▶</span>
+                    </div>
+                    <div class="code-section-content" id="method3">
+                        <div class="code-block">
+<code><span class="keyword">from</span> langchain_experimental.text_splitter <span class="keyword">import</span> SemanticChunker
+<span class="keyword">from</span> langchain_openai <span class="keyword">import</span> OpenAIEmbeddings
+
+splitter = SemanticChunker(
+    OpenAIEmbeddings(),
+    breakpoint_threshold_type=<span class="string">"percentile"</span>,
+    breakpoint_threshold_amount=<span class="number">95</span>
+)
+
+chunks = splitter.<span class="function">split_text</span>(text)</code>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="code-section-card">
+                    <div class="code-section-header" onclick="toggleCodeSection('pipeline')">
+                        <h3>Complete Pipeline Example</h3>
+                        <span class="toggle-icon" id="icon-pipeline">▶</span>
+                    </div>
+                    <div class="code-section-content" id="pipeline">
+                        <div class="code-block">
+<code><span class="keyword">from</span> langchain_community.document_loaders <span class="keyword">import</span> PyPDFLoader
+<span class="keyword">from</span> langchain.text_splitter <span class="keyword">import</span> RecursiveCharacterTextSplitter
+<span class="keyword">from</span> langchain_openai <span class="keyword">import</span> OpenAIEmbeddings
+<span class="keyword">from</span> langchain_community.vectorstores <span class="keyword">import</span> PGVector
+
+<span class="comment"># 1. Load document</span>
+loader = PyPDFLoader(<span class="string">"document.pdf"</span>)
+documents = loader.<span class="function">load</span>()
+
+<span class="comment"># 2. Split into chunks</span>
+text_splitter = RecursiveCharacterTextSplitter(
+    chunk_size=<span class="number">800</span>,
+    chunk_overlap=<span class="number">160</span>,
+    separators=[<span class="string">"\n\n"</span>, <span class="string">"\n"</span>, <span class="string">". "</span>, <span class="string">" "</span>]
+)
+
+chunks = text_splitter.<span class="function">split_documents</span>(documents)
+
+<span class="comment"># 3. Add custom metadata</span>
+<span class="keyword">for</span> i, chunk <span class="keyword">in</span> <span class="function">enumerate</span>(chunks):
+    chunk.metadata[<span class="string">"chunk_index"</span>] = i
+    chunk.metadata[<span class="string">"total_chunks"</span>] = <span class="function">len</span>(chunks)
+
+<span class="comment"># 4. Create embeddings and store</span>
+embeddings = OpenAIEmbeddings()
+vectorstore = PGVector.<span class="function">from_documents</span>(
+    documents=chunks,
+    embedding=embeddings,
+    connection_string=<span class="string">"postgresql://..."</span>
+)</code>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="pitfalls">
+                <div class="section-header">
+                    <h2>7. Common Pitfalls & Solutions</h2>
+                    <span class="back-to-menu" onclick="document.getElementById('navigation-menu').scrollIntoView({behavior: 'smooth'}); return false;">Back to Menu</span>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Pitfall</th>
+                            <th>Symptom</th>
+                            <th>Solution</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Splitting Mid-Sentence</strong></td>
+                            <td>Incomplete thoughts, poor embeddings</td>
+                            <td>Use RecursiveCharacterTextSplitter with sentence separators</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Ignoring Document Structure</strong></td>
+                            <td>Headers separated from content</td>
+                            <td>Use MarkdownTextSplitter or preserve section headers in chunks</td>
+                        </tr>
+                        <tr>
+                            <td><strong>No Overlap</strong></td>
+                            <td>Missing information at boundaries</td>
+                            <td>Set chunk_overlap to 15-20% of chunk_size</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Too Small Chunks</strong></td>
+                            <td>Lost context, poor retrieval</td>
+                            <td>Increase to minimum 400 tokens</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Too Large Chunks</strong></td>
+                            <td>Irrelevant results, slow search</td>
+                            <td>Reduce to 800-1000 tokens maximum</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Missing Metadata</strong></td>
+                            <td>Can't cite sources, poor filtering</td>
+                            <td>Always include document_id, page, section</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Wrong Token Counter</strong></td>
+                            <td>Chunks larger than expected</td>
+                            <td>Use tiktoken with model-specific encoding</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="highlight">
+                    <h3>Testing Your Chunking Strategy</h3>
+                    <ol style="margin: 10px 0 10px 20px;">
+                        <li>Manually review 10-20 chunks for completeness</li>
+                        <li>Test with known questions - are answers retrievable?</li>
+                        <li>Check chunk size distribution (should be consistent)</li>
+                        <li>Verify metadata is preserved correctly</li>
+                        <li>Monitor retrieval quality metrics over time</li>
+                    </ol>
+                </div>
+            </section>
+
+            <section id="checklist">
+                <div class="section-header">
+                    <h2>8. Implementation Checklist</h2>
+                    <span class="back-to-menu" onclick="document.getElementById('navigation-menu').scrollIntoView({behavior: 'smooth'}); return false;">Back to Menu</span>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+                    <ul class="checklist" style="margin: 0;">
+                        <li><strong>Choose Chunking Method</strong><br>
+                        RecursiveCharacterTextSplitter for most cases, semantic for critical docs</li>
+                        
+                        <li><strong>Set Optimal Chunk Size</strong><br>
+                        Target: 800 tokens (range 500-1000), measure with tiktoken</li>
+                        
+                        <li><strong>Configure Overlap</strong><br>
+                        Set to 15-20% of chunk size (120-200 tokens for 800 token chunks)</li>
+                        
+                        <li><strong>Define Separators</strong><br>
+                        Prioritize: ["\n\n", "\n", ". ", " ", ""]</li>
+                    </ul>
+                    
+                    <ul class="checklist" style="margin: 0;">
+                        <li><strong>Preserve Metadata</strong><br>
+                        Minimum: document_id, chunk_index, source_file, page_number</li>
+                        
+                        <li><strong>Test & Validate</strong><br>
+                        Review sample chunks, test known queries, monitor quality</li>
+                        
+                        <li><strong>Monitor Performance</strong><br>
+                        Track: retrieval accuracy, response relevance, user satisfaction</li>
+                        
+                        <li><strong>Iterate Based on Feedback</strong><br>
+                        Adjust chunk size/overlap based on real usage patterns</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section>
+                <div class="section-header">
+                    <h2>9. Quick Reference</h2>
+                    <span class="back-to-menu" onclick="document.getElementById('navigation-menu').scrollIntoView({behavior: 'smooth'}); return false;">Back to Menu</span>
+                </div>
+
+                <div style="background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%); padding: 25px; border-radius: 10px; margin: 20px 0;">
+                    <h3 style="color: #1565c0; margin-top: 0;">Recommended Starting Configuration</h3>
+                    <div class="code-block" style="background: white; color: #333;">
+<code><span class="keyword">from</span> langchain.text_splitter <span class="keyword">import</span> RecursiveCharacterTextSplitter
+
+splitter = RecursiveCharacterTextSplitter(
+    chunk_size=<span class="number">800</span>,              <span class="comment"># Sweet spot for most docs</span>
+    chunk_overlap=<span class="number">160</span>,           <span class="comment"># 20% overlap</span>
+    length_function=<span class="function">len</span>,
+    separators=[<span class="string">"\n\n"</span>, <span class="string">"\n"</span>, <span class="string">". "</span>, <span class="string">" "</span>, <span class="string">""</span>]
+)</code>
+                    </div>
+                </div>
+
+                <h3>Resources</h3>
+                <div class="card">
+                    <ul>
+                        <li><a href="https://python.langchain.com/docs/how_to/#text-splitters" target="_blank">LangChain Text Splitters Documentation</a></li>
+                        <li><a href="https://github.com/openai/tiktoken" target="_blank">tiktoken - OpenAI's Token Counter</a></li>
+                        <li><a href="https://www.pinecone.io/learn/chunking-strategies/" target="_blank">Pinecone's Chunking Guide</a></li>
+                    </ul>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        // Toggle code sections
+        function toggleCodeSection(sectionId) {
+            const sectionContent = document.getElementById(sectionId);
+            const toggleIcon = document.getElementById(`icon-${sectionId}`);
+            
+            if (sectionContent.classList.contains('collapsed')) {
+                // Expand
+                sectionContent.classList.remove('collapsed');
+                toggleIcon.textContent = '▼';
+                toggleIcon.classList.remove('rotated');
+            } else {
+                // Collapse
+                sectionContent.classList.add('collapsed');
+                toggleIcon.textContent = '▶';
+                toggleIcon.classList.add('rotated');
+            }
+        }
+
+        // Initialize all code sections as collapsed by default
+        document.addEventListener('DOMContentLoaded', function() {
+            const codeSectionContents = document.querySelectorAll('.code-section-content');
+            const toggleIcons = document.querySelectorAll('.code-section-header .toggle-icon');
+            
+            codeSectionContents.forEach(content => {
+                content.classList.add('collapsed');
+            });
+            
+            toggleIcons.forEach(icon => {
+                icon.textContent = '▶';
+                icon.classList.add('rotated');
+            });
+        });
+    </script>
+</body>
+</html>

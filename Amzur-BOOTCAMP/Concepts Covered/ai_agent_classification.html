@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Agent Classification Framework</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .classification-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .classification-category {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .classification-category::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .classification-category:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .category-title {
+            font-size: 1.4em;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .category-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            color: white;
+        }
+
+        .agents-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .agent-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .agent-item:hover {
+            background: #e3f2fd;
+            transform: translateX(5px);
+            border-left-color: #764ba2;
+        }
+
+        .agent-name {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        .agent-description {
+            color: #666;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+
+        .agent-example {
+            color: #667eea;
+            font-style: italic;
+            font-size: 0.85em;
+            margin-top: 5px;
+        }
+
+        .legend {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            margin-top: 30px;
+        }
+
+        .legend h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .legend p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .color-coding {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .color-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .color-box {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+
+        /* Category-specific colors */
+        .intelligence .category-icon { background: #e74c3c; }
+        .intelligence .agent-item { border-left-color: #e74c3c; }
+        .intelligence .agent-item:hover { border-left-color: #c0392b; }
+
+        .environment .category-icon { background: #3498db; }
+        .environment .agent-item { border-left-color: #3498db; }
+        .environment .agent-item:hover { border-left-color: #2980b9; }
+
+        .architecture .category-icon { background: #f39c12; }
+        .architecture .agent-item { border-left-color: #f39c12; }
+        .architecture .agent-item:hover { border-left-color: #e67e22; }
+
+        .autonomy .category-icon { background: #27ae60; }
+        .autonomy .agent-item { border-left-color: #27ae60; }
+        .autonomy .agent-item:hover { border-left-color: #229954; }
+
+        .social .category-icon { background: #9b59b6; }
+        .social .agent-item { border-left-color: #9b59b6; }
+        .social .agent-item:hover { border-left-color: #8e44ad; }
+
+        .mobility .category-icon { background: #1abc9c; }
+        .mobility .agent-item { border-left-color: #1abc9c; }
+        .mobility .agent-item:hover { border-left-color: #16a085; }
+
+        .learning .category-icon { background: #e67e22; }
+        .learning .agent-item { border-left-color: #e67e22; }
+        .learning .agent-item:hover { border-left-color: #d35400; }
+
+        /* Popup Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 700px;
+            max-height: 80vh;
+            overflow-y: auto;
+            margin: 20px;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
+            transform: scale(0.9) translateY(-30px);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1) translateY(0);
+        }
+
+        .modal-header {
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.8em;
+            color: #2c3e50;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .modal-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #e74c3c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            color: white;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 2em;
+            color: #999;
+            cursor: pointer;
+            padding: 0;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .modal-section {
+            margin-bottom: 25px;
+        }
+
+        .modal-section h3 {
+            color: #2c3e50;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-section h3::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: #2c3e50;
+            border-radius: 2px;
+        }
+
+        .modal-section p {
+            color: #555;
+            line-height: 1.7;
+            margin-bottom: 15px;
+        }
+
+        .characteristics-list {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+
+        .characteristics-list ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .characteristics-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .characteristics-list li:last-child {
+            border-bottom: none;
+        }
+
+        .characteristics-list li::before {
+            content: '✓';
+            color: #27ae60;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .use-cases {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .use-case-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .use-case-card h4 {
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .use-case-card p {
+            font-size: 0.9em;
+            opacity: 0.9;
+            line-height: 1.5;
+            color: white;
+        }
+
+        .limitations-advantages {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .advantages, .limitations {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .advantages h4 {
+            color: #27ae60;
+            margin-bottom: 15px;
+        }
+
+        .limitations h4 {
+            color: #e74c3c;
+            margin-bottom: 15px;
+        }
+
+        .advantages ul, .limitations ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .advantages li, .limitations li {
+            padding: 5px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .advantages li::before {
+            content: '👍';
+            font-size: 1.1em;
+        }
+
+        .limitations li::before {
+            content: '⚠️';
+            font-size: 1.1em;
+        }
+
+        .clickable-hint {
+            position: relative;
+        }
+
+        .clickable-hint::after {
+            content: '🔍 Click for details';
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            font-size: 0.7em;
+            color: #999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .intelligence .agent-item.clickable-hint:hover::after,
+        .environment .agent-item.clickable-hint:hover::after {
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .classification-grid {
+                grid-template-columns: 1fr;
+            },
+            'reactive': {
+                title: 'Reactive Agents',
+                icon: '⚡',
+                description: 'Reactive agents operate through direct stimulus-response coupling without internal reasoning or planning. They respond immediately to environmental changes based on pre-programmed behaviors, making them fast but limited in complex scenarios.',
+                characteristics: [
+                    'Direct stimulus-response mapping',
+                    'No internal world representation',
+                    'Immediate action execution',
+                    'Fast response times',
+                    'Behavior-based architecture',
+                    'No deliberation or planning phase'
+                ],
+                useCases: [
+                    {
+                        title: 'Emergency Systems',
+                        description: 'Fire suppression systems, emergency brakes, safety shutoffs'
+                    },
+                    {
+                        title: 'Real-time Control',
+                        description: 'Industrial automation, motor control, sensor-based responses'
+                    },
+                    {
+                        title: 'Biological Models',
+                        description: 'Insect-inspired robots, swarm behavior, reflex actions'
+                    },
+                    {
+                        title: 'Game NPCs',
+                        description: 'Simple enemy AI with immediate response patterns'
+                    }
+                ],
+                advantages: [
+                    'Extremely fast response times',
+                    'Low computational overhead',
+                    'Predictable and reliable behavior',
+                    'Works well in time-critical situations',
+                    'Simple to implement and debug',
+                    'Robust in familiar environments'
+                ],
+                limitations: [
+                    'Cannot handle complex, multi-step tasks',
+                    'No learning or adaptation capabilities',
+                    'Poor performance in novel situations',
+                    'May exhibit oscillatory behavior',
+                    'Cannot optimize long-term outcomes',
+                    'Limited problem-solving abilities'
+                ],
+                realWorldExample: 'Anti-lock Braking Systems (ABS) in cars are classic reactive agents. When wheel sensors detect skidding, the system immediately pulses the brakes without any planning or deliberation. The reaction is instantaneous and based purely on sensor input - if skidding is detected, reduce brake pressure; if not, maintain normal braking. This reactive approach is perfect for safety-critical situations where milliseconds matter.'
+            },
+            'deliberative': {
+                title: 'Deliberative Agents',
+                icon: '🧠',
+                description: 'Deliberative agents use explicit reasoning, planning, and internal world models to make decisions. They think before acting, considering multiple options and their consequences to choose optimal actions for achieving long-term goals.',
+                characteristics: [
+                    'Explicit reasoning and planning',
+                    'Internal world model maintenance',
+                    'Goal-oriented behavior',
+                    'Multi-step problem solving',
+                    'Symbolic knowledge representation',
+                    'Deliberation before action'
+                ],
+                useCases: [
+                    {
+                        title: 'Strategic Planning',
+                        description: 'Business strategy systems, military planning, resource allocation'
+                    },
+                    {
+                        title: 'Chess & Game AI',
+                        description: 'Deep Blue, AlphaGo, strategic game players'
+                    },
+                    {
+                        title: 'Mission Planning',
+                        description: 'Space mission control, expedition planning, logistics'
+                    },
+                    {
+                        title: 'Financial Analysis',
+                        description: 'Investment strategies, risk assessment, portfolio optimization'
+                    }
+                ],
+                advantages: [
+                    'Optimal or near-optimal solutions',
+                    'Can handle complex, multi-step problems',
+                    'Considers long-term consequences',
+                    'Flexible and adaptable to new goals',
+                    'Can explain reasoning process',
+                    'Works well in stable environments'
+                ],
+                limitations: [
+                    'Slow response times due to planning',
+                    'High computational requirements',
+                    'May be too slow for dynamic environments',
+                    'Requires accurate world models',
+                    'Can get stuck in analysis paralysis',
+                    'Poor real-time performance'
+                ],
+                realWorldExample: 'IBM\'s Deep Blue chess computer exemplifies deliberative agents. Before each move, it explores millions of possible future game states, evaluating potential consequences 6-12 moves ahead. It uses sophisticated evaluation functions to assess board positions and selects moves that maximize its winning chances. This deliberative approach allowed it to defeat world champion Garry Kasparov by thinking deeply about long-term strategy rather than just reacting to immediate threats.'
+            },
+            'hybrid': {
+                title: 'Hybrid Agents',
+                icon: '🔄',
+                description: 'Hybrid agents combine the best of both reactive and deliberative approaches, using layered architectures that can respond quickly to immediate threats while also planning for long-term objectives. They balance speed and intelligence.',
+                characteristics: [
+                    'Multi-layered architecture',
+                    'Reactive layer for immediate responses',
+                    'Deliberative layer for planning',
+                    'Priority-based behavior selection',
+                    'Real-time adaptability',
+                    'Context-sensitive reasoning'
+                ],
+                useCases: [
+                    {
+                        title: 'Autonomous Vehicles',
+                        description: 'Emergency braking + route planning, obstacle avoidance + navigation'
+                    },
+                    {
+                        title: 'Robotics',
+                        description: 'Service robots, exploration rovers, manufacturing robots'
+                    },
+                    {
+                        title: 'Smart Buildings',
+                        description: 'Emergency systems + energy optimization, security + comfort'
+                    },
+                    {
+                        title: 'Trading Systems',
+                        description: 'Risk management + long-term investment strategies'
+                    }
+                ],
+                advantages: [
+                    'Fast response to emergencies',
+                    'Strategic long-term planning capability',
+                    'Balances speed and intelligence',
+                    'Robust in dynamic environments',
+                    'Can handle multiple priorities',
+                    'Scalable architecture'
+                ],
+                limitations: [
+                    'Complex architecture and coordination',
+                    'Difficult to design and debug',
+                    'Potential conflicts between layers',
+                    'Higher development costs',
+                    'Coordination overhead',
+                    'Behavior can be unpredictable'
+                ],
+                realWorldExample: 'Modern autonomous vehicles are excellent examples of hybrid agents. The reactive layer handles immediate safety concerns - if a child runs into the road, the car brakes instantly without deliberation. Meanwhile, the deliberative layer continuously plans the optimal route, considering traffic, weather, and fuel efficiency. The planning system might decide to take a longer route to avoid traffic, but if an emergency occurs, the reactive system takes immediate control to ensure safety.'
+            }
+            
+            .container {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .modal-content {
+                margin: 10px;
+                padding: 20px;
+                max-height: 90vh;
+            }
+
+            .modal-title {
+                font-size: 1.5em;
+            }
+
+            .limitations-advantages {
+                grid-template-columns: 1fr;
+            }
+
+            .use-cases {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>AI Agent Classification Framework</h1>
+            <p>Comprehensive taxonomy of artificial intelligence agents based on various characteristics</p>
+        </div>
+
+        <div class="classification-grid">
+            <!-- Intelligence Level -->
+            <div class="classification-category intelligence">
+                <div class="category-title">
+                    <div class="category-icon">🧠</div>
+                    1. By Intelligence Level (Russell & Norvig)
+                </div>
+                <div class="agents-list">
+                    <div class="agent-item clickable-hint" data-agent="simple-reflex">
+                        <div class="agent-name">Simple Reflex Agents</div>
+                        <div class="agent-description">React based on current perception only • Use condition-action rules</div>
+                        <div class="agent-example">Example: Basic chatbot with scripted responses</div>
+                    </div>
+                    <div class="agent-item clickable-hint" data-agent="model-based">
+                        <div class="agent-name">Model-Based Reflex Agents</div>
+                        <div class="agent-description">Maintain internal state/model • Consider world evolution</div>
+                        <div class="agent-example">Example: Smart thermostat tracking temperature trends</div>
+                    </div>
+                    <div class="agent-item clickable-hint" data-agent="goal-based">
+                        <div class="agent-name">Goal-Based Agents</div>
+                        <div class="agent-description">Have explicit goals • Plan and reason about consequences</div>
+                        <div class="agent-example">Example: GPS navigation system finding optimal routes</div>
+                    </div>
+                    <div class="agent-item clickable-hint" data-agent="utility-based">
+                        <div class="agent-name">Utility-Based Agents</div>
+                        <div class="agent-description">Optimize multiple objectives • Use utility functions</div>
+                        <div class="agent-example">Example: Resource allocation systems balancing cost, speed, quality</div>
+                    </div>
+                    <div class="agent-item clickable-hint" data-agent="learning">
+                        <div class="agent-name">Learning Agents</div>
+                        <div class="agent-description">Improve through experience • Adapt to new environments</div>
+                        <div class="agent-example">Example: Recommendation systems learning user preferences</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Environment Interaction -->
+            <div class="classification-category environment">
+                <div class="category-title">
+                    <div class="category-icon">🌍</div>
+                    2. By Environment Interaction
+                </div>
+                <div class="agents-list">
+                    <div class="agent-item clickable-hint" data-agent="reactive">
+                        <div class="agent-name">Reactive Agents</div>
+                        <div class="agent-description">Respond directly to stimuli • No long-term planning • Fast response</div>
+                        <div class="agent-example">Example: Reflex-based control systems</div>
+                    </div>
+                    <div class="agent-item clickable-hint" data-agent="deliberative">
+                        <div class="agent-name">Deliberative Agents</div>
+                        <div class="agent-description">Plan before acting • Reason about consequences • Thoughtful</div>
+                        <div class="agent-example">Example: Strategic planning systems</div>
+                    </div>
+                    <div class="agent-item clickable-hint" data-agent="hybrid">
+                        <div class="agent-name">Hybrid Agents</div>
+                        <div class="agent-description">Combine reactive and deliberative • Quick reflexes + planning</div>
+                        <div class="agent-example">Example: Autonomous vehicle control systems</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Architecture -->
+            <div class="classification-category architecture">
+                <div class="category-title">
+                    <div class="category-icon">⚙️</div>
+                    3. By Architecture
+                </div>
+                <div class="agents-list">
+                    <div class="agent-item">
+                        <div class="agent-name">Logic-Based Agents</div>
+                        <div class="agent-description">Use formal logic • Rules and knowledge bases • Explainable</div>
+                        <div class="agent-example">Example: Expert systems, rule-based AI</div>
+                    </div>
+                    <div class="agent-item">
+                        <div class="agent-name">Neural Network Agents</div>
+                        <div class="agent-description">Based on neural networks • Learn patterns • Less interpretable</div>
+                        <div class="agent-example">Example: Deep learning models, neural chatbots</div>
+                    </div>
+                    <div class="agent-item">
+                        <div class="agent-name">Evolutionary Agents</div>
+                        <div class="agent-description">Use genetic algorithms • Populations evolve over time</div>
+                        <div class="agent-example">Example: Genetic programming systems</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Autonomy Level -->
+            <div class="classification-category autonomy">
+                <div class="category-title">
+                    <div class="category-icon">🤖</div>
+                    4. By Autonomy Level
+                </div>
+                <div class="agents-list">
+                    <div class="agent-item">
+                        <div class="agent-name">Fully Autonomous</div>
+                        <div class="agent-description">Operate completely independently • No human intervention</div>
+                        <div class="agent-example">Example: Fully self-driving cars</div>
+                    </div>
+                    <div class="agent-item">
+                        <div class="agent-name">Semi-Autonomous</div>
+                        <div class="agent-description">Some human oversight required • Human-in-the-loop</div>
+                        <div class="agent-example">Example: Assisted driving systems</div>
+                    </div>
+                    <div class="agent-item">
+                        <div class="agent-name">Assistive/Collaborative</div>
+                        <div class="agent-description">Work alongside humans • Augment capabilities</div>
+                        <div class="agent-example">Example: AI writing assistants</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Social Capability -->
+            <div class="classification-category social">
+                <div class="category-title">
+                    <div class="category-icon">👥</div>
+                    5. By Social Capability
+                </div>
+                <div class="agents-list">
+                    <div class="agent-item">
+                        <div class="agent-name">Individual Agents</div>
+                        <div class="agent-description">Operate in isolation • Single-agent systems</div>
+                        <div class="agent-example">Example: Personal AI assistants</div>
+                    </div>
+                    <div class="agent-item">
+                        <div class="agent-name">Multi-Agent Systems</div>
+                        <div class="agent-description">Multiple agents interact • Cooperation or competition</div>
+                        <div class="agent-example">Example: Distributed computing systems</div>
+                    </div>
+                    <div class="agent-item">
+                        <div class="agent-name">Swarm Agents</div>
+                        <div class="agent-description">Many simple agents • Collective intelligence emerges</div>
+                        <div class="agent-example">Example: Ant colony optimization algorithms</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobility -->
+            <div class="classification-category mobility">
+                <div class="category-title">
+                    <div class="category-icon">📱</div>
+                    6. By Mobility
+                </div>
+                <div class="agents-list">
+                    <div class="agent-item">
+                        <div class="agent-name">Static Agents</div>
+                        <div class="agent-description">Remain in one environment • Process information locally</div>
+                        <div class="agent-example">Example: Desktop applications, local AI models</div>
+                    </div>
+                    <div class="agent-item">
+                        <div class="agent-name">Mobile Agents</div>
+                        <div class="agent-description">Move between environments • Migrate across networks</div>
+                        <div class="agent-example">Example: Web crawlers, distributed agents</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Learning Approach -->
+            <div class="classification-category learning">
+                <div class="category-title">
+                    <div class="category-icon">📚</div>
+                    7. By Learning Approach
+                </div>
+                <div class="agents-list">
+                    <div class="agent-item">
+                        <div class="agent-name">Supervised Learning Agents</div>
+                        <div class="agent-description">Learn from labeled training data</div>
+                        <div class="agent-example">Example: Image classification systems</div>
+                    </div>
+                    <div class="agent-item">
+                        <div class="agent-name">Unsupervised Learning Agents</div>
+                        <div class="agent-description">Find patterns in unlabeled data</div>
+                        <div class="agent-example">Example: Clustering systems, anomaly detection</div>
+                    </div>
+                    <div class="agent-item">
+                        <div class="agent-name">Reinforcement Learning Agents</div>
+                        <div class="agent-description">Learn through trial and error with rewards/penalties</div>
+                        <div class="agent-example">Example: Game-playing AI, robotics control</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="legend">
+            <h3>Key Insights</h3>
+            <p>
+                <strong>Multi-dimensional Classification:</strong> Real-world AI agents typically combine characteristics from multiple categories. For example, a modern autonomous vehicle might be a goal-based, hybrid, neural network agent that uses reinforcement learning and operates semi-autonomously.
+            </p>
+            <p style="margin-top: 15px;">
+                <strong>Evolutionary Perspective:</strong> As AI technology advances, agents tend to move toward higher intelligence levels, greater autonomy, and more sophisticated learning capabilities. The classification framework helps identify where current systems stand and where they're heading.
+            </p>
+            
+            <div class="color-coding">
+                <div class="color-item">
+                    <div class="color-box" style="background: #e74c3c;"></div>
+                    <span>Intelligence Level</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background: #3498db;"></div>
+                    <span>Environment</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background: #f39c12;"></div>
+                    <span>Architecture</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background: #27ae60;"></div>
+                    <span>Autonomy</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background: #9b59b6;"></div>
+                    <span>Social</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background: #1abc9c;"></div>
+                    <span>Mobility</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background: #e67e22;"></div>
+                    <span>Learning</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for detailed information -->
+    <div class="modal-overlay" id="agentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <div class="modal-icon">🧠</div>
+                    <span id="modalTitle">Agent Details</span>
+                </h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div id="modalBody">
+                <!-- Dynamic content will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Agent detailed information data
+        const agentDetails = {
+            'simple-reflex': {
+                title: 'Simple Reflex Agents',
+                icon: '⚡',
+                description: 'The most basic type of AI agent that operates purely on a condition-action basis. These agents select actions based only on the current percept, ignoring the rest of the percept history.',
+                characteristics: [
+                    'Condition-action rules (if-then statements)',
+                    'No memory of past perceptions',
+                    'Immediate response to stimuli',
+                    'Stateless operation',
+                    'Fast execution time',
+                    'Limited intelligence and adaptability'
+                ],
+                useCases: [
+                    {
+                        title: 'Basic Chatbots',
+                        description: 'Simple rule-based chatbots that respond to specific keywords or phrases'
+                    },
+                    {
+                        title: 'Automatic Doors',
+                        description: 'Motion sensors that open doors when detecting movement'
+                    },
+                    {
+                        title: 'Spam Filters',
+                        description: 'Basic email filters using keyword-based rules'
+                    },
+                    {
+                        title: 'Reflex Controllers',
+                        description: 'Simple robotic controllers for immediate responses'
+                    }
+                ],
+                advantages: [
+                    'Very fast response time',
+                    'Simple to implement and understand',
+                    'Low computational requirements',
+                    'Predictable behavior',
+                    'Works well in simple, predictable environments'
+                ],
+                limitations: [
+                    'Cannot handle partially observable environments',
+                    'No learning capability',
+                    'Limited to pre-programmed responses',
+                    'Prone to infinite loops',
+                    'Cannot adapt to changing environments'
+                ],
+                realWorldExample: 'A classic example is a vacuum cleaner robot that moves forward until it hits an obstacle, then turns and continues. It doesn\'t remember where it\'s been or plan a path - it simply reacts to immediate sensor input.'
+            },
+            'model-based': {
+                title: 'Model-Based Reflex Agents',
+                icon: '🗺️',
+                description: 'These agents maintain an internal state that describes the part of the world which cannot be seen. They use a model of how the world works to make decisions based on both current perceptions and internal state.',
+                characteristics: [
+                    'Internal state representation',
+                    'World model maintenance',
+                    'State transition knowledge',
+                    'Sensor model understanding',
+                    'History-aware decision making',
+                    'Better handling of partial observability'
+                ],
+                useCases: [
+                    {
+                        title: 'Smart Thermostats',
+                        description: 'Track temperature trends and occupancy patterns over time'
+                    },
+                    {
+                        title: 'Navigation Systems',
+                        description: 'Maintain current location and map state for routing'
+                    },
+                    {
+                        title: 'Security Systems',
+                        description: 'Track entry/exit patterns and maintain security state'
+                    },
+                    {
+                        title: 'Traffic Controllers',
+                        description: 'Monitor traffic flow patterns and adjust signal timing'
+                    }
+                ],
+                advantages: [
+                    'Handles partial observability better',
+                    'More robust than simple reflex agents',
+                    'Can maintain context over time',
+                    'Better performance in dynamic environments',
+                    'Can predict world state changes'
+                ],
+                limitations: [
+                    'Still limited to reactive behavior',
+                    'Model accuracy affects performance',
+                    'More complex than simple reflex agents',
+                    'May not work well with incomplete models',
+                    'No explicit goal reasoning'
+                ],
+                realWorldExample: 'A smart home thermostat that tracks indoor/outdoor temperatures, occupancy patterns, and time of day to maintain comfort while optimizing energy usage. It builds a model of how the house heats and cools over time.'
+            },
+            'goal-based': {
+                title: 'Goal-Based Agents',
+                icon: '🎯',
+                description: 'These agents act to achieve their goals by considering future consequences of actions. They use goal information along with search and planning algorithms to find action sequences that lead to desirable states.',
+                characteristics: [
+                    'Explicit goal representation',
+                    'Planning and search capabilities',
+                    'Future consequence evaluation',
+                    'Action sequence generation',
+                    'Flexible behavior based on goals',
+                    'Can handle new situations with same goals'
+                ],
+                useCases: [
+                    {
+                        title: 'GPS Navigation',
+                        description: 'Find optimal routes to reach destination goals'
+                    },
+                    {
+                        title: 'Game AI',
+                        description: 'NPCs with objectives like reaching locations or completing tasks'
+                    },
+                    {
+                        title: 'Robotic Path Planning',
+                        description: 'Robots navigating to specific locations while avoiding obstacles'
+                    },
+                    {
+                        title: 'Automated Trading',
+                        description: 'Systems working toward profit goals while managing risk'
+                    }
+                ],
+                advantages: [
+                    'Flexible and adaptable to new situations',
+                    'Can handle complex, multi-step problems',
+                    'Goal-directed behavior is intuitive',
+                    'Can work in previously unseen environments',
+                    'Better long-term decision making'
+                ],
+                limitations: [
+                    'May not optimize between competing goals',
+                    'Planning can be computationally expensive',
+                    'Goal specification can be challenging',
+                    'May not handle conflicting objectives well',
+                    'Requires good search/planning algorithms'
+                ],
+                realWorldExample: 'A GPS navigation system that takes your destination goal and current location, then searches through possible routes considering traffic, distance, and road conditions to find the optimal path. It can adapt if roads are blocked or traffic changes.'
+            },
+            'utility-based': {
+                title: 'Utility-Based Agents',
+                icon: '⚖️',
+                description: 'These agents use utility functions to measure the desirability of different states or outcomes. They can handle multiple, potentially conflicting goals by optimizing overall utility rather than just achieving binary goals.',
+                characteristics: [
+                    'Utility function representation',
+                    'Multi-objective optimization',
+                    'Trade-off decision making',
+                    'Preference modeling',
+                    'Rational choice behavior',
+                    'Handles uncertainty and risk'
+                ],
+                useCases: [
+                    {
+                        title: 'Resource Allocation',
+                        description: 'Cloud computing systems balancing cost, performance, and reliability'
+                    },
+                    {
+                        title: 'Financial Planning',
+                        description: 'Investment advisors optimizing return vs. risk preferences'
+                    },
+                    {
+                        title: 'Supply Chain Management',
+                        description: 'Optimizing cost, speed, quality, and sustainability simultaneously'
+                    },
+                    {
+                        title: 'Recommendation Systems',
+                        description: 'Balancing user preferences, diversity, and business objectives'
+                    }
+                ],
+                advantages: [
+                    'Handles multiple competing objectives',
+                    'Provides rational decision framework',
+                    'Can incorporate risk and uncertainty',
+                    'Flexible preference representation',
+                    'Supports complex trade-off decisions'
+                ],
+                limitations: [
+                    'Utility function design is challenging',
+                    'Computational complexity can be high',
+                    'May require extensive preference elicitation',
+                    'Utility functions may not capture all nuances',
+                    'Can be difficult to explain decisions'
+                ],
+                realWorldExample: 'An automated trading system that doesn\'t just aim to maximize profit, but balances multiple factors: expected return, risk tolerance, liquidity needs, and regulatory constraints. It uses a utility function to weigh these competing objectives and make optimal investment decisions.'
+            },
+            'learning': {
+                title: 'Learning Agents',
+                icon: '📈',
+                description: 'These agents improve their performance through experience. They can adapt to new environments, learn from feedback, and modify their behavior over time to become more effective at achieving their objectives.',
+                characteristics: [
+                    'Experience-based improvement',
+                    'Adaptation to new environments',
+                    'Performance monitoring',
+                    'Knowledge base updates',
+                    'Exploration vs. exploitation balance',
+                    'Continuous self-improvement'
+                ],
+                useCases: [
+                    {
+                        title: 'Recommendation Systems',
+                        description: 'Learn user preferences over time to improve suggestions'
+                    },
+                    {
+                        title: 'Autonomous Vehicles',
+                        description: 'Improve driving behavior through experience and feedback'
+                    },
+                    {
+                        title: 'Fraud Detection',
+                        description: 'Adapt to new fraud patterns and techniques over time'
+                    },
+                    {
+                        title: 'Personal Assistants',
+                        description: 'Learn user habits, preferences, and communication styles'
+                    }
+                ],
+                advantages: [
+                    'Continuous improvement over time',
+                    'Adapts to changing environments',
+                    'Handles previously unseen situations',
+                    'Can discover new strategies',
+                    'Reduces need for manual programming'
+                ],
+                limitations: [
+                    'Requires training data or experience',
+                    'Learning can be slow initially',
+                    'May learn incorrect patterns',
+                    'Exploration can lead to poor performance',
+                    'Complex to design and debug'
+                ],
+                realWorldExample: 'Netflix\'s recommendation system learns from your viewing history, ratings, and behavior patterns. It continuously improves its suggestions by analyzing what you watch, how long you watch, when you stop watching, and comparing your preferences with similar users. The system adapts to your changing tastes over time.'
+            }
+        };
+
+        function openModal(agentType) {
+            const modal = document.getElementById('agentModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+            
+            const agent = agentDetails[agentType];
+            if (!agent) return;
+            
+            modalTitle.textContent = agent.title;
+            document.querySelector('.modal-icon').textContent = agent.icon;
+            
+            // Set modal colors based on agent type category
+            const modalIcon = document.querySelector('.modal-icon');
+            const modalSections = document.querySelectorAll('.modal-section h3, .modal-section h3::before');
+            
+            if (['simple-reflex', 'model-based', 'goal-based', 'utility-based', 'learning'].includes(agentType)) {
+                modalIcon.style.background = '#e74c3c';
+            } else if (['reactive', 'deliberative', 'hybrid'].includes(agentType)) {
+                modalIcon.style.background = '#3498db';
+            }
+            
+            modalBody.innerHTML = `
+                <div class="modal-section">
+                    <h3>Overview</h3>
+                    <p>${agent.description}</p>
+                </div>
+                
+                <div class="modal-section">
+                    <h3>Key Characteristics</h3>
+                    <div class="characteristics-list">
+                        <ul>
+                            ${agent.characteristics.map(char => `<li>${char}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="modal-section">
+                    <h3>Real-World Use Cases</h3>
+                    <div class="use-cases">
+                        ${agent.useCases.map(useCase => `
+                            <div class="use-case-card">
+                                <h4>${useCase.title}</h4>
+                                <p>${useCase.description}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                
+                <div class="modal-section">
+                    <h3>Advantages & Limitations</h3>
+                    <div class="limitations-advantages">
+                        <div class="advantages">
+                            <h4>Advantages</h4>
+                            <ul>
+                                ${agent.advantages.map(adv => `<li>${adv}</li>`).join('')}
+                            </ul>
+                        </div>
+                        <div class="limitations">
+                            <h4>Limitations</h4>
+                            <ul>
+                                ${agent.limitations.map(lim => `<li>${lim}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-section">
+                    <h3>Detailed Example</h3>
+                    <p>${agent.realWorldExample}</p>
+                </div>
+            `;
+            
+            // Set section header colors based on category after content is inserted
+            const sectionHeaders = modalBody.querySelectorAll('.modal-section h3');
+            sectionHeaders.forEach(header => {
+                if (['simple-reflex', 'model-based', 'goal-based', 'utility-based', 'learning'].includes(agentType)) {
+                    header.style.color = '#e74c3c';
+                } else if (['reactive', 'deliberative', 'hybrid'].includes(agentType)) {
+                    header.style.color = '#3498db';
+                }
+            });
+            
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('agentModal');
+            modal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Add interactive functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const agentItems = document.querySelectorAll('.agent-item');
+            
+            agentItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const agentType = this.getAttribute('data-agent');
+                    if (agentType) {
+                        openModal(agentType);
+                    } else {
+                        // Remove active class from all items
+                        agentItems.forEach(i => i.classList.remove('active'));
+                        
+                        // Add active class to clicked item
+                        this.classList.add('active');
+                        
+                        // Optional: Add some visual feedback
+                        this.style.transform = 'scale(1.02)';
+                        setTimeout(() => {
+                            this.style.transform = 'translateX(5px)';
+                        }, 200);
+                    }
+                });
+            });
+
+            // Add hover effects to categories
+            const categories = document.querySelectorAll('.classification-category');
+            categories.forEach(category => {
+                category.addEventListener('mouseenter', function() {
+                    this.style.borderColor = getComputedStyle(this.querySelector('.category-icon')).backgroundColor;
+                });
+                
+                category.addEventListener('mouseleave', function() {
+                    this.style.borderColor = 'transparent';
+                });
+            });
+
+            // Close modal when clicking outside
+            document.getElementById('agentModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeModal();
+                }
+            });
+
+            // Close modal with Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeModal();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
