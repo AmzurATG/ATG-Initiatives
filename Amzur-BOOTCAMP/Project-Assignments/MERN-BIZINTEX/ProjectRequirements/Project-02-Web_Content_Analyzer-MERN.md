@@ -113,7 +113,6 @@ mern-web-analyzer/
 **Philosophy**: Focus on **deliverable quality** and **comprehensive review compliance** rather than rigid timelines. Each milestone must pass all relevant review templates from our Templates folder before proceeding.
 
 ### **Milestone 1: Web Scraping Foundation & Data Extraction**
-**Estimated Time**: 4-8 hours (flexible based on learning pace)
 
 #### **Deliverables:**
 - [ ] Working development environment with web scraping dependencies (Cheerio, Axios)
@@ -131,7 +130,6 @@ mern-web-analyzer/
 - [ ] **Performance Review**: Efficient content extraction and memory management
 
 ### **Milestone 2: LLM Integration & Analysis Engine**
-**Estimated Time**: 4-6 hours (flexible based on Milestone 1 completion)
 
 #### **Deliverables:**
 - [ ] LLM integration for content analysis and report generation
@@ -148,7 +146,6 @@ mern-web-analyzer/
 - [ ] **Security Review**: Content sanitization and safe processing
 
 ### **Milestone 3: Production Features & Advanced Analysis**
-**Estimated Time**: 3-5 hours (flexible based on previous milestones)
 
 #### **Deliverables:**
 - [ ] Advanced report formatting with expandable sections
@@ -482,13 +479,6 @@ Your prompts should:
 - Reject requests with excessive data
 - Sanitize all string inputs
 - Validate numeric ranges
-
-**Rate Limiting:**
-- Limit requests per IP address (10-20 per minute)
-- Limit requests per API key if using authentication
-- Implement cooldown periods for repeated failures
-- Return appropriate HTTP 429 responses
-- Provide retry-after headers
 
 #### **Error Handling Security**
 
@@ -1274,7 +1264,6 @@ Before submitting your project, verify:
 - Security assessment (SSRF prevention)
 - Content extraction quality
 - Error handling evaluation
-- Feedback provided within 24-48 hours
 
 **Stage 2: Functionality Review (After Milestone 2)**
 - LLM integration assessment
@@ -1289,11 +1278,6 @@ Before submitting your project, verify:
 - Documentation review
 - Production readiness check
 - Final scoring and feedback
-
-### **Review Response Time**
-- Code reviews: 24-48 hours
-- Questions/blockers: Same day (business hours)
-- Final evaluation: 48-72 hours
 
 ### **Feedback Format**
 - Written feedback document

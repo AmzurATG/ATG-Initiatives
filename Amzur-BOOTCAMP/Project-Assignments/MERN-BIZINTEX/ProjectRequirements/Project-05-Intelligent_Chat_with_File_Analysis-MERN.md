@@ -187,7 +187,6 @@ mern-intelligent-chat/  (extends mern-auth-system from Project 4)
 - [ ] **Frontend Working**: React app with role-based UI and protected routes
 
 ### **Milestone 1: Chat System Integration**
-**Estimated Time**: 6-8 hours (Day 1)
 
 #### **Deliverables:**
 - [ ] Extend MongoDB schema with chat collections (threads, messages)
@@ -203,7 +202,6 @@ mern-intelligent-chat/  (extends mern-auth-system from Project 4)
 - [ ] **Integration Review**: Seamless extension of Project 4
 
 ### **Milestone 2: File Upload & Document Processing**
-**Estimated Time**: 8-10 hours (Day 2)
 
 #### **Deliverables:**
 - [ ] File upload endpoint (admin-only, using existing RBAC)
@@ -219,7 +217,6 @@ mern-intelligent-chat/  (extends mern-auth-system from Project 4)
 - [ ] **Code Quality Review**: Clean file processing architecture
 
 ### **Milestone 3: RAG System Implementation**
-**Estimated Time**: 10-12 hours (Day 3)
 
 #### **Deliverables:**
 - [ ] Document chunking service (split text into semantic chunks)
@@ -236,7 +233,6 @@ mern-intelligent-chat/  (extends mern-auth-system from Project 4)
 - [ ] **Architecture Review**: Scalable RAG design
 
 ### **Milestone 4: Data Analysis (Optional but Recommended)**
-**Estimated Time**: 6-8 hours (Day 4)
 
 #### **Deliverables:**
 - [ ] Excel/CSV parsing and data extraction
@@ -251,7 +247,6 @@ mern-intelligent-chat/  (extends mern-auth-system from Project 4)
 - [ ] **User Experience Review**: Clear data presentation
 
 ### **Milestone 5: Production Readiness**
-**Estimated Time**: 4-6 hours (Day 4-5)
 
 #### **Deliverables:**
 - [ ] File management interface for admins

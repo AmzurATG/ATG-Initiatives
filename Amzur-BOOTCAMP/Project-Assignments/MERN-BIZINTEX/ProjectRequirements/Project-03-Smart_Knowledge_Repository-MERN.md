@@ -163,7 +163,6 @@ mern-knowledge-repo/
 **Philosophy**: Focus on **deliverable quality** and **comprehensive review compliance** rather than rigid timelines. Each milestone must pass all relevant review templates from our Templates folder before proceeding.
 
 ### **Milestone 1: Data Collection & Knowledge Storage**
-**Estimated Time**: 4-6 hours (flexible based on learning pace)
 
 #### **Deliverables:**
 - [ ] MongoDB database setup with proper connection
@@ -181,7 +180,6 @@ mern-knowledge-repo/
 - [ ] **Performance Review**: Efficient data extraction, storage, and retrieval
 
 ### **Milestone 2: Intelligent Query & Scope Management**
-**Estimated Time**: 4-6 hours (flexible based on Milestone 1 completion)
 
 #### **Deliverables:**
 - [ ] Scope detection service (in-domain vs out-domain)
@@ -199,7 +197,6 @@ mern-knowledge-repo/
 - [ ] **Code Quality Review**: Maintainable search and query systems
 
 ### **Milestone 3: Production Features & Knowledge Management**
-**Estimated Time**: 3-4 hours (flexible based on previous milestones)
 
 #### **Deliverables:**
 - [ ] Profile browsing interface with filtering
@@ -1499,7 +1496,6 @@ Before submitting your project, verify:
 - Scraping implementation assessment
 - Data quality evaluation
 - Initial architecture review
-- Feedback within 24-48 hours
 
 **Stage 2: Milestone 2 Review**
 - Scope detection accuracy testing

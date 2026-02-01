@@ -117,7 +117,6 @@ mern-image-chat/  (extends mern-intelligent-chat from Project 5)
 - [ ] **OpenAI Account**: API key for DALL-E 3 access
 
 ### **Milestone 1: Direct Image Generation & Storage**
-**Estimated Time**: 4-5 hours (Day 1)
 
 #### **Deliverables:**
 - [ ] DALL-E 3 API integration with secure key management
@@ -133,7 +132,6 @@ mern-image-chat/  (extends mern-intelligent-chat from Project 5)
 - [ ] **Performance Review**: Efficient image generation and storage
 
 ### **Milestone 2: Chat Integration & UI Enhancement**
-**Estimated Time**: 6-7 hours (Day 2)
 
 #### **Deliverables:**
 - [ ] Enhanced chat interface with image generation commands
@@ -149,7 +147,6 @@ mern-image-chat/  (extends mern-intelligent-chat from Project 5)
 - [ ] **Performance Review**: Responsive UI during API calls
 
 ### **Milestone 3: Gallery & Management Features**
-**Estimated Time**: 4-5 hours (Day 3)
 
 #### **Deliverables:**
 - [ ] Complete image gallery with grid view
@@ -165,7 +162,6 @@ mern-image-chat/  (extends mern-intelligent-chat from Project 5)
 - [ ] **Code Quality Review**: Clean component architecture
 
 ### **Milestone 4: Production Features & Optimization**
-**Estimated Time**: 4-5 hours (Day 4)
 
 #### **Deliverables:**
 - [ ] Advanced prompt assistance and suggestions
@@ -663,12 +659,6 @@ Success Response (200):
 ## **Rate Limiting & Cost Management**
 
 ### **Rate Limiting Strategy**
-
-**Per-User Limits:**
-- 5 images per hour (adjust based on your needs)
-- 20 images per day
-- 100 images per month
-- Track in database or Redis
 
 **Implementation:**
 - Store generation timestamps per user

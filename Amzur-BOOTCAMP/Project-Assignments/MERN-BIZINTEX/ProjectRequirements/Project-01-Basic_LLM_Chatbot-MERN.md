@@ -95,7 +95,6 @@ mern-llm-chatbot/
 **Philosophy**: Focus on **deliverable quality** and **comprehensive review compliance** rather than rigid timelines. Each milestone must pass all relevant review templates from our Templates folder before proceeding.
 
 ### **Milestone 1: Foundation Setup & API Integration**
-**Estimated Time**: 4-8 hours (flexible based on learning pace)
 
 #### **Deliverables:**
 - [ ] Working development environment with proper MERN project structure
@@ -112,7 +111,6 @@ mern-llm-chatbot/
 - [ ] **AI Integration Review**: Proper API integration patterns with Node.js
 
 ### **Milestone 2: Core Chat Functionality**
-**Estimated Time**: 4-6 hours (flexible based on Milestone 1 completion)
 
 #### **Deliverables:**
 - [ ] Complete React chat interface with message history
@@ -130,7 +128,6 @@ mern-llm-chatbot/
 - [ ] **Code Quality Review**: Clean separation of concerns and maintainable code
 
 ### **Milestone 3: Production Readiness & Documentation**
-**Estimated Time**: 2-4 hours (flexible based on previous milestones)
 
 #### **Deliverables:**
 - [ ] Comprehensive documentation (README, setup instructions, API documentation)
@@ -883,7 +880,6 @@ Before submitting your project, verify:
 - Architecture review
 - Security compliance check
 - API integration verification
-- Feedback provided within 24-48 hours
 
 **Stage 2: Functionality Review (After Milestone 2)**
 - End-to-end testing
@@ -896,11 +892,6 @@ Before submitting your project, verify:
 - Documentation review
 - Production readiness check
 - Final scoring and feedback
-
-### **Review Response Time**
-- Code reviews: 24-48 hours
-- Questions/blockers: Same day (business hours)
-- Final evaluation: 48-72 hours
 
 ### **Feedback Format**
 - Written feedback document

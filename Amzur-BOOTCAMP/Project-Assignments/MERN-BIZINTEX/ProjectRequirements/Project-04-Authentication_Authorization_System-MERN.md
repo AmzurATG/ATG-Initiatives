@@ -178,7 +178,6 @@ mern-auth-system/
 **Philosophy**: Focus on **deliverable quality** and **comprehensive review compliance** rather than rigid timelines. Each milestone must pass all relevant review templates from our Templates folder before proceeding.
 
 ### **Milestone 1: Core Authentication Foundation**
-**Estimated Time**: 8-10 hours (flexible based on learning pace)
 
 #### **Deliverables:**
 - [ ] MongoDB database setup with user schema design
@@ -195,7 +194,6 @@ mern-auth-system/
 - [ ] **Code Quality Review**: Clean code organization and documentation
 
 ### **Milestone 2: Authentication System & JWT Implementation**
-**Estimated Time**: 8-10 hours (flexible based on Milestone 1 completion)
 
 #### **Deliverables:**
 - [ ] Complete JWT authentication system with token management
@@ -213,7 +211,6 @@ mern-auth-system/
 - [ ] **Performance Review**: Efficient authentication flows and token management
 
 ### **Milestone 3: Role-Based Access Control (RBAC) Implementation**
-**Estimated Time**: 6-8 hours (flexible based on previous milestones)
 
 #### **Deliverables:**
 - [ ] User model updated with role field (default: 'user', options: 'user', 'admin')
@@ -230,7 +227,6 @@ mern-auth-system/
 - [ ] **Code Quality Review**: Maintainable authorization patterns
 
 ### **Milestone 4: Frontend Authorization & Admin Features**
-**Estimated Time**: 6-8 hours (flexible based on previous milestones)
 
 #### **Deliverables:**
 - [ ] Updated React authentication context with role management
@@ -248,7 +244,6 @@ mern-auth-system/
 - [ ] **Code Quality Review**: Clean conditional rendering and state management
 
 ### **Milestone 5: Social Authentication Integration**
-**Estimated Time**: 6-8 hours (flexible based on previous milestones)
 
 #### **Deliverables:**
 - [ ] OAuth 2.0 implementation using Passport.js
@@ -268,7 +263,6 @@ mern-auth-system/
 - [ ] **User Experience Review**: Seamless social login flows and error handling
 
 ### **Milestone 6: Production Readiness & Advanced Features**
-**Estimated Time**: 4-6 hours (flexible based on previous milestones)
 
 #### **Deliverables:**
 - [ ] Production-ready dashboard interface with role-appropriate features
@@ -884,14 +878,6 @@ Configure CORS to:
 - Set appropriate headers
 - Restrict to specific origins in production
 
-#### **Rate Limiting**
-
-Implement rate limiting for:
-- Login attempts: 5 requests per 15 minutes per IP
-- Registration: 3 requests per hour per IP
-- Password reset: 3 requests per hour per email
-- API endpoints: 100 requests per 15 minutes per user
-- Admin endpoints: Lower limits (50 requests per 15 minutes)
 
 #### **Security Headers (Helmet.js)**
 
